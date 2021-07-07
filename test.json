@@ -24,7 +24,7 @@
     "name": "dense_1",
     "input": "relu_1",
     "config": {
-
+      "units": 64
     }
   },
   {
