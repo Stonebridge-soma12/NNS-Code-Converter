@@ -7,7 +7,7 @@
 ```json
 [
   {
-    "type": "conv2d",ㅎ
+    "type": "conv2d",
     "name": "conv2d_1",
     "input": null,
     "config": {
@@ -20,7 +20,7 @@
         3,
         3
       ],
-      "filter": 32,
+      "filters": 32,
       "stride": 1,
       "padding": "same"
     }
@@ -51,7 +51,7 @@
 ```
 - 변환된 Python 코드
 ```python
-conv2d_1 = tf.keras.layers.Conv2D(32, (3, 3), input_shape=(1, 256, 256), padding='same')(data)
+conv2d_1 = tf.keras.layers.Conv2D(filters=32, kernel_size=(3, 3), input_shape=(1, 256, 256), padding='same')(data)
 relu_1 = tf.keras.layers.Activation('relu')(conv2d_1)
 dense_1 = tf.keras.layers.Dense(units=64)(relu_1)
 sigmoid_1 = tf.keras.layers.Activation('sigmoid')(dense_1)
