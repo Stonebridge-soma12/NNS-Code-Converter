@@ -54,5 +54,5 @@
 conv2d_1 = tf.keras.layers.Conv2D(32, (3, 3), input_shape=(1, 256, 256), padding='same')(data)
 relu_1 = tf.keras.layers.Activation('relu')(conv2d_1)
 dense_1 = tf.keras.layers.Dense(units=64)(relu_1)
-sigmoid_1 = tf.keras.layers.Activation('sigmoid)(dense_1)
+sigmoid_1 = tf.keras.layers.Activation('sigmoid')(dense_1)
 ```
