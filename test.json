@@ -1,0 +1,38 @@
+[
+  {
+    "type": "conv2d",
+    "name": "conv2d_1",
+    "input": null,
+    "config": {
+      "shape": [1, 256, 256],
+      "kernel_size": [3, 3],
+      "filter": 32,
+      "stride": 1,
+      "padding": "same"
+    }
+  },
+  {
+    "type": "relu",
+    "name": "relu_1",
+    "input": "conv2d_1",
+    "config": {
+
+    }
+  },
+  {
+    "type": "dense",
+    "name": "dense_1",
+    "input": "relu_1",
+    "config": {
+
+    }
+  },
+  {
+    "type": "sigmoid",
+    "name": "sigmoid_1",
+    "input": "dense_1",
+    "config": {
+
+    }
+  }
+]
