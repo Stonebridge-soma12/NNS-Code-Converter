@@ -1,38 +1,79 @@
-[
-  {
-    "type": "conv2d",
-    "name": "conv2d_1",
-    "input": null,
-    "config": {
-      "shape": [1, 256, 256],
-      "kernel_size": [3, 3],
-      "filter": 32,
-      "stride": 1,
-      "padding": "same"
-    }
+{
+  "config": {
+    "optimizer": "adam",
+    "loss": "sparse_categorical_crossentropy",
+    "metrics": ["accuracy"],
+    "batch_size": 32,
+    "epochs": 10,
+    "output": "activation_3", // output layer의 이름
+    // callback함수는 어떻게 처리???
   },
-  {
-    "type": "relu",
-    "name": "relu_1",
-    "input": "conv2d_1",
-    "config": {
-
+  "layers": [
+    {
+      "type": "input",
+      "name": "input_1",
+      "input": null,
+      "config": {
+        "input_shape": [28, 28, 1]
+      }
+    },
+    {
+      "type": "conv2d",
+      "name": "conv2d_1",
+      "input": "input_1",
+      "config": {
+        "kernel_size": [3, 3],
+        "filters": 32,
+        "stride": 1,
+        "padding": "same"
+      }
+    },
+    {
+      "type": "activation",
+      "name": "activation_1",
+      "input": "conv2d_1",
+      "config": {
+        "activation": "relu"
+      }
+    },
+    {
+      "type": "flatten",
+      "name": "flatten_1",
+      "input": "activation_1",
+      "config": {
+      }
+    },
+    {
+      "type": "dense",
+      "name": "dense_1",
+      "input": "flatten_1",
+      "config": {
+        "units": 64
+      }
+    },
+    {
+      "type": "activation",
+      "name": "activation_2",
+      "input": "dense_1",
+      "config": {
+        "activation": "relu"
+      }
+    },
+    {
+      "type": "dense",
+      "name": "dense_2",
+      "input": "activation_2",
+      "config": {
+        "units": 10
+      }
+    },
+    {
+      "type": "activation",
+      "name": "activation_3",
+      "input": "dense_2",
+      "config": {
+        "activation": "softmax"
+      }
     }
-  },
-  {
-    "type": "dense",
-    "name": "dense_1",
-    "input": "relu_1",
-    "config": {
-      "units": 64
-    }
-  },
-  {
-    "type": "sigmoid",
-    "name": "sigmoid_1",
-    "input": "dense_1",
-    "config": {
-
-    }
-  }
-]
+  ]
+}
