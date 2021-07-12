@@ -2,7 +2,7 @@
 - 그래프 형식으로 그린 신경망을 파이썬 코드로 변환시키는 모듈
 
 # Supports
-### [https://www.tensorflow.org/?hl=ko][Tensorflow-Keras]
+### [Tensorflow-Keras](https://www.tensorflow.org/?hl=ko)
   - Dense
     - units - integer
   - Conv2D
