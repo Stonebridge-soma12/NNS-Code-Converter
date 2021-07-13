@@ -34,88 +34,91 @@
 ## 실행 예시
 - 클라이언트로 부터 받은 신경망 정보 JSON 파일
 
+
+### Config.json
 ```json
-// Project config
 {
   "optimizer": "adam",
   "learning_rate": 0.001,
   "loss": "sparse_categorical_crossentropy",
   "metrics": ["accuracy"],
   "batch_size": 32,
-  "epochs": 10,
+  "epochs": 10
 }
+```
 
-// Content
+### Content.json
+```json
 {
   "output": "activation_3",
   "layers": [
     {
-      "type": "input",
+      "type": "Input",
       "name": "input_1",
       "input": null,
       "config": {
-        "input_shape": [28, 28, 1],
+        "input_shape": "28, 28, 1"
       }
     },
     {
-      "type": "conv2d",
+      "type": "Conv2d",
       "name": "conv2d_1",
       "input": "input_1",
       "config": {
-        "kernel_size": [3, 3],
-        "filters": 32,
-        "stride": 1,
+        "kernel_size": "3, 3",
+        "filters": "32",
+        "stride": "1",
         "padding": "same"
       }
     },
     {
-      "type": "activation",
+      "type": "Activation",
       "name": "activation_1",
       "input": "conv2d_1",
       "config": {
-        "activation": "relu",
+        "activation": "relu"
       }
     },
     {
-      "type": "flatten",
+      "type": "Flatten",
       "name": "flatten_1",
       "input": "activation_1",
       "config": {
       }
     },
     {
-      "type": "dense",
+      "type": "Dense",
       "name": "dense_1",
       "input": "flatten_1",
       "config": {
-        "units": 64,
+        "units": "64"
       }
     },
     {
-      "type": "activation",
+      "type": "Activation",
       "name": "activation_2",
       "input": "dense_1",
       "config": {
-        "activation": "relu",
+        "activation": "relu"
       }
     },
     {
-      "type": "dense",
+      "type": "Dense",
       "name": "dense_2",
       "input": "activation_2",
       "config": {
-        "units": 10,
+        "units": "10"
       }
     },
     {
-      "type": "activation",
+      "type": "Activation",
       "name": "activation_3",
       "input": "dense_2",
       "config": {
-        "activation": "softmax",
+        "activation": "softmax"
       }
-    },
-  ],
+    }
+  ]
 }
 ```
 - 변환된 Python 코드
