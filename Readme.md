@@ -35,16 +35,19 @@
 - 클라이언트로 부터 받은 신경망 정보 JSON 파일
 
 ```json
+// Project config
 {
-  "config": {
-    "optimizer": "adam",
-    "loss": "sparse_categorical_crossentropy",
-    "metrics": ["accuracy"],
-    "batch_size": 32,
-    "epochs": 10,
-    "output": "activation_3", // output layer의 이름
-    // callback함수는 어떻게 처리???
-  },
+  "optimizer": "adam",
+  "learning_rate": 0.001,
+  "loss": "sparse_categorical_crossentropy",
+  "metrics": ["accuracy"],
+  "batch_size": 32,
+  "epochs": 10,
+}
+
+// Content
+{
+  "output": "activation_3",
   "layers": [
     {
       "type": "input",
