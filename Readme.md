@@ -61,7 +61,7 @@
       }
     },
     {
-      "type": "Conv2d",
+      "type": "Conv2D",
       "name": "conv2d_1",
       "input": "input_1",
       "config": {
