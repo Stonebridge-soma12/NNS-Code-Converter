@@ -1,5 +1,5 @@
 # Code converter
-- 그래프 형식으로 그린 신경망을 파이썬 코드로 변환시키는 모듈
+- 그래프 형식으로 그린 신경망을 파이썬 코드로 변환시키는 모듈.
 
 # Supports
 ### [Tensorflow-Keras](https://www.tensorflow.org/?hl=ko)
