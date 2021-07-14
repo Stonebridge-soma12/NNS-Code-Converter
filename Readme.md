@@ -51,27 +51,31 @@
 ```json
 {
   "output": "activation_3",
+  "input": "input_1",
   "layers": [
     {
+      "category": "layer",
       "type": "Input",
       "name": "input_1",
       "input": null,
       "config": {
-        "input_shape": "28, 28, 1"
+        "shape": "28, 28, 1"
       }
     },
     {
+      "category": "layer",
       "type": "Conv2D",
       "name": "conv2d_1",
       "input": "input_1",
       "config": {
         "kernel_size": "3, 3",
         "filters": "32",
-        "stride": "1",
+        "strides": "1, 1",
         "padding": "same"
       }
     },
     {
+      "category": "layer",
       "type": "Activation",
       "name": "activation_1",
       "input": "conv2d_1",
@@ -80,6 +84,7 @@
       }
     },
     {
+      "category": "layer",
       "type": "Flatten",
       "name": "flatten_1",
       "input": "activation_1",
@@ -87,6 +92,7 @@
       }
     },
     {
+      "category": "layer",
       "type": "Dense",
       "name": "dense_1",
       "input": "flatten_1",
@@ -95,6 +101,7 @@
       }
     },
     {
+      "category": "layer",
       "type": "Activation",
       "name": "activation_2",
       "input": "dense_1",
@@ -103,6 +110,7 @@
       }
     },
     {
+      "category": "layer",
       "type": "Dense",
       "name": "dense_2",
       "input": "activation_2",
@@ -111,6 +119,7 @@
       }
     },
     {
+      "category": "layer",
       "type": "Activation",
       "name": "activation_3",
       "input": "dense_2",
