@@ -2,3 +2,5 @@
 
 # Goland configuresg
 .idea/
+
+*.py
