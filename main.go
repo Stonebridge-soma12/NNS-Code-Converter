@@ -52,7 +52,8 @@ func digitCheck(target string) bool {
 	return false
 }
 
-func GetLayers() []string {
+// Generate Layer codes from content.json
+func GenLayers() []string {
 	var content Content
 	var codes []string
 
@@ -114,7 +115,8 @@ func GetLayers() []string {
 	return codes
 }
 
-func GetConfig() []string {
+// generate compile codes from config.json
+func GenConfig() []string {
 	var codes []string
 
 	// model compile
@@ -131,7 +133,10 @@ func GetConfig() []string {
 		fmt.Println(err)
 	}
 
+	// get optimizer
 	optimizer := fmt.Sprintf("%s.optimizers.%s(lr=%f)", TF + Keras, config.Optimizer, config.LearningRate)
+
+	// get metrics
 	var metrics string
 	for i := 1; i <= len(config.Metrics); i++ {
 		metrics += fmt.Sprintf("\"%s\"", config.Metrics[i - 1])
@@ -139,6 +144,8 @@ func GetConfig() []string {
 			metrics += ", "
 		}
 	}
+
+	// get compile
 	compile := fmt.Sprintf("model.compile(optimizer=%s, loss=\"%s\", metrics=[%s])\n", optimizer, config.Loss, metrics)
 	codes = append(codes, compile)
 
@@ -146,7 +153,10 @@ func GetConfig() []string {
 }
 
 func GenerateCode() {
-	codes := append(GetLayers(), GetConfig()...)
+	var codes []string
+	codes = append(codes, ImportTF)
+	codes = append(codes, GenLayers()...)
+	codes = append(codes, GenConfig()...)
 
 	// create python file
 	py, err := os.Create("test.py")
@@ -157,11 +167,6 @@ func GenerateCode() {
 	defer py.Close()
 
 	fileSize := 0
-	fileSize, err = py.Write([]byte(ImportTF))
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
 	for _, code := range codes {
 		n, err := py.Write([]byte(code))
 		if err != nil {
