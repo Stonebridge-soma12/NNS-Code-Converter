@@ -6,30 +6,33 @@ import (
 	"io/ioutil"
 	"os"
 	"strings"
+
+	"github.com/labstack/echo/v4"
+	"net/http"
 )
 
 type Content struct {
-	Output string	`json:"output"`
-	Input string	`json:"input"`
-	Layers []Component	`json:"layers"`
+	Output string      `json:"output"`
+	Input  string      `json:"input"`
+	Layers []Component `json:"layers"`
 }
 
 type Config struct {
-	Optimizer string `json:"optimizer"`
-	LearningRate float64 `json:"learning_rate"`
-	Loss string `json:"loss"`
-	Metrics []string `json:"metrics"`
-	BatchSize int `json:"batch_size"`
-	Epochs int `json:"epochs"`
-	Output string `json:"output"`
+	Optimizer    string   `json:"optimizer"`
+	LearningRate float64  `json:"learning_rate"`
+	Loss         string   `json:"loss"`
+	Metrics      []string `json:"metrics"`
+	BatchSize    int      `json:"batch_size"`
+	Epochs       int      `json:"epochs"`
+	Output       string   `json:"output"`
 }
 
 type Component struct {
-	Category string	`json:"category"`
-	Type   string                 `json:"type"`
-	Name   string                 `json:"name"`
-	Input  *string                 `json:"input"`
-	Config map[string]string `json:"config"`
+	Category string            `json:"category"`
+	Type     string            `json:"type"`
+	Name     string            `json:"name"`
+	Input    *string           `json:"input"`
+	Config   map[string]string `json:"config"`
 }
 
 const ImportTF = "import tensorflow as tf\n\n"
@@ -38,14 +41,14 @@ const Keras = ".keras"
 const Layer = ".layers"
 const Math = ".math"
 
-var category = map[string]string {
+var category = map[string]string{
 	"layer": TF + Keras + Layer,
-	"math": TF + Math,
+	"math":  TF + Math,
 }
 
 func digitCheck(target string) bool {
 	for i := 0; i < 10; i++ {
-		if strings.Contains(target, string(i + '0')) {
+		if strings.Contains(target, string(i+'0')) {
 			return true
 		}
 	}
@@ -53,22 +56,21 @@ func digitCheck(target string) bool {
 }
 
 // Generate Layer codes from content.json
-func GenLayers() []string {
-	var content Content
+func GenLayers(content Content) []string {
 	var codes []string
 
-	contents, err := os.Open("./content.json")
-	if err != nil {
-		fmt.Println(err)
-	}
-	defer contents.Close()
-
-	byteValue, _ := ioutil.ReadAll(contents)
-
-	err = json.Unmarshal(byteValue, &content)
-	if err != nil {
-		fmt.Println(err)
-	}
+	//contents, err := os.Open("./content.json")
+	//if err != nil {
+	//	fmt.Println(err)
+	//}
+	//defer contents.Close()
+	//
+	//byteValue, _ := ioutil.ReadAll(contents)
+	//
+	//err = json.Unmarshal(byteValue, &content)
+	//if err != nil {
+	//	fmt.Println(err)
+	//}
 
 	// code converting
 	for _, d := range content.Layers {
@@ -109,37 +111,36 @@ func GenLayers() []string {
 	}
 
 	// create model.
-	model := fmt.Sprintf("model = %s.Model(inputs=%s, outputs=%s)\n\n", TF + Keras, content.Input, content.Output)
+	model := fmt.Sprintf("model = %s.Model(inputs=%s, outputs=%s)\n\n", TF+Keras, content.Input, content.Output)
 	codes = append(codes, model)
 
 	return codes
 }
 
 // generate compile codes from config.json
-func GenConfig() []string {
+func GenConfig(config Config) []string {
 	var codes []string
 
-	// model compile
-	configs, err := os.Open("./config.json")
-	if err != nil {
-		fmt.Println(err)
-	}
-	defer configs.Close()
-
-	configByte, _ := ioutil.ReadAll(configs)
-	var config Config
-	err = json.Unmarshal(configByte, &config)
-	if err != nil {
-		fmt.Println(err)
-	}
+	//// model compile
+	//configs, err := os.Open("./config.json")
+	//if err != nil {
+	//	fmt.Println(err)
+	//}
+	//defer configs.Close()
+	//
+	//configByte,_ := ioutil.ReadAll(configs)
+	//err = json.Unmarshal(configByte, &config)
+	//if err != nil {
+	//	fmt.Println(err)
+	//}
 
 	// get optimizer
-	optimizer := fmt.Sprintf("%s.optimizers.%s(lr=%f)", TF + Keras, config.Optimizer, config.LearningRate)
+	optimizer := fmt.Sprintf("%s.optimizers.%s(lr=%f)", TF+Keras, config.Optimizer, config.LearningRate)
 
 	// get metrics
 	var metrics string
 	for i := 1; i <= len(config.Metrics); i++ {
-		metrics += fmt.Sprintf("\"%s\"", config.Metrics[i - 1])
+		metrics += fmt.Sprintf("\"%s\"", config.Metrics[i-1])
 		if i < len(config.Metrics) {
 			metrics += ", "
 		}
@@ -152,11 +153,11 @@ func GenConfig() []string {
 	return codes
 }
 
-func GenerateCode() {
+func GenerateCode(content Content, config Config) {
 	var codes []string
 	codes = append(codes, ImportTF)
-	codes = append(codes, GenLayers()...)
-	codes = append(codes, GenConfig()...)
+	codes = append(codes, GenLayers(content)...)
+	codes = append(codes, GenConfig(config)...)
 
 	// create python file
 	py, err := os.Create("test.py")
@@ -179,5 +180,29 @@ func GenerateCode() {
 }
 
 func main() {
-	GenerateCode()
+	e := echo.New()
+	e.GET("/", func(c echo.Context) error {
+		return c.String(http.StatusOK, "Hello, World!")
+	})
+
+	e.POST("/generate", func(c echo.Context) error {
+		var content Content
+		var config Config
+
+		// binding JSON
+		err := c.Bind(content)
+		if err != nil {
+			fmt.Println(err)
+		}
+
+		err = c.Bind(config)
+		if err != nil {
+			fmt.Println(err)
+		}
+
+		// return fIle.
+		return c.Attachment("./test.py", "model.py")
+	})
+
+	e.Logger.Fatal(e.Start(":80"))
 }
