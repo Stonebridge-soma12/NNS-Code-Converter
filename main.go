@@ -1,9 +1,9 @@
 package main
 
 import (
-	"encoding/json"
+	// "encoding/json"
+	// "io/ioutil"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"strings"
 
@@ -33,6 +33,11 @@ type Component struct {
 	Name     string            `json:"name"`
 	Input    *string           `json:"input"`
 	Config   map[string]string `json:"config"`
+}
+
+type Project struct {
+	Config  Config  `json:"config"`
+	Content Content `json:"content"`
 }
 
 const ImportTF = "import tensorflow as tf\n\n"
@@ -128,8 +133,8 @@ func GenConfig(config Config) []string {
 	//}
 	//defer configs.Close()
 	//
-	//configByte,_ := ioutil.ReadAll(configs)
-	//err = json.Unmarshal(configByte, &config)
+	//configByte,_ := ioutil.ReadAll(config)
+	//err := json.Unmarshal(configByte, &config)
 	//if err != nil {
 	//	fmt.Println(err)
 	//}
@@ -153,7 +158,7 @@ func GenConfig(config Config) []string {
 	return codes
 }
 
-func GenerateCode(content Content, config Config) {
+func GenerateCode(config Config, content Content) {
 	var codes []string
 	codes = append(codes, ImportTF)
 	codes = append(codes, GenLayers(content)...)
@@ -176,7 +181,7 @@ func GenerateCode(content Content, config Config) {
 		}
 		fileSize += n
 	}
-	fmt.Printf("Code converting is finish with %d bytes size", fileSize)
+	fmt.Printf("Code converting is finish with %d bytes size\n", fileSize)
 }
 
 func main() {
@@ -185,20 +190,16 @@ func main() {
 		return c.String(http.StatusOK, "Hello, World!")
 	})
 
-	e.POST("/generate", func(c echo.Context) error {
-		var content Content
-		var config Config
+	e.POST("/make-python", func(c echo.Context) error {
+		project := new(Project)
 
 		// binding JSON
-		err := c.Bind(content)
+		err := c.Bind(project)
 		if err != nil {
 			fmt.Println(err)
 		}
 
-		err = c.Bind(config)
-		if err != nil {
-			fmt.Println(err)
-		}
+		GenerateCode(project.Config, project.Content)
 
 		// return fIle.
 		return c.Attachment("./test.py", "model.py")
