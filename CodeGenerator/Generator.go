@@ -27,6 +27,7 @@ type Component struct {
 	Type     string            `json:"type"`
 	Name     string            `json:"name"`
 	Input    *string           `json:"input"`
+	Output   *string           `json:"output"`
 	Config   map[string]string `json:"config"`
 }
 
