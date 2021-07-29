@@ -43,8 +43,8 @@ const Layer = ".layers"
 const Math = ".math"
 
 var category = map[string]string{
-	"layer": TF + Keras + Layer,
-	"math":  TF + Math,
+	"Layer": TF + Keras + Layer,
+	"Math":  TF + Math,
 }
 
 func digitCheck(target string) bool {
