@@ -1,6 +1,7 @@
 package CodeGenerator
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"regexp"
@@ -58,6 +59,7 @@ func digitCheck(target string) bool {
 }
 
 func SortLayers(source []Component) []Component {
+	// Sorting layer components via BFS.
 	type node struct {
 		idx int
 		Output *string
@@ -90,7 +92,7 @@ func SortLayers(source []Component) []Component {
 		}
 	}
 
-	// Using BFS.
+	// Using BFS with queue
 	var q Queue
 	q.Push(source[inputIdx].Name)
 	for !q.Empty() {
@@ -107,7 +109,7 @@ func SortLayers(source []Component) []Component {
 }
 
 // Generate Layer codes from content.json
-func GenLayers(content Content) []string {
+func GenLayers(content Content) ([]string, error) {
 	var codes []string
 
 	layers := SortLayers(content.Layers)
@@ -122,6 +124,9 @@ func GenLayers(content Content) []string {
 
 		i := 1
 		for conf := range d.Config {
+			if d.Config[conf] == "" {
+				return nil, errors.New("The value of layer config is empty")
+			}
 			var param string
 
 			// if data is array like.
@@ -154,7 +159,7 @@ func GenLayers(content Content) []string {
 	model := fmt.Sprintf("model = %s.Model(inputs=%s, outputs=%s)\n\n", TF+Keras, content.Input, content.Output)
 	codes = append(codes, model)
 
-	return codes
+	return codes, nil
 }
 
 // generate compile codes from config.json
@@ -180,17 +185,22 @@ func GenConfig(config Config) []string {
 	return codes
 }
 
-func GenerateModel(config Config, content Content) {
+func GenerateModel(config Config, content Content) error {
 	var codes []string
 	codes = append(codes, ImportTF)
-	codes = append(codes, GenLayers(content)...)
+
+	Layers, err := GenLayers(content)
+	if err != nil {
+		return err
+	}
+	codes = append(codes, Layers...)
+
 	codes = append(codes, GenConfig(config)...)
 
 	// create python file
 	py, err := os.Create("model.py")
 	if err != nil {
-		fmt.Println(err)
-		return
+		return err
 	}
 	defer py.Close()
 
@@ -198,10 +208,10 @@ func GenerateModel(config Config, content Content) {
 	for _, code := range codes {
 		n, err := py.Write([]byte(code))
 		if err != nil {
-			fmt.Println(err)
-			return
+			return err
 		}
 		fileSize += n
 	}
 	fmt.Printf("Code converting is finish with %d bytes size\n", fileSize)
+	return nil
 }
