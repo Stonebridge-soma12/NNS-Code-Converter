@@ -3,6 +3,7 @@ package CodeGenerator
 import (
 	"fmt"
 	"os"
+	"regexp"
 	"strings"
 )
 
@@ -36,6 +37,22 @@ type Project struct {
 	Content Content `json:"content"`
 }
 
+type Queue struct {
+	item chan string
+}
+
+func (q *Queue) Push(val string) {
+	q.item <- val
+}
+
+func (q *Queue) Pop() string {
+	return <- q.item
+}
+
+func (q *Queue) Empty() bool {
+	return len(q.item) == 0
+}
+
 const ImportTF = "import tensorflow as tf\n\n"
 const TF = "tf"
 const Keras = ".keras"
@@ -48,20 +65,57 @@ var category = map[string]string{
 }
 
 func digitCheck(target string) bool {
-	for i := 0; i < 10; i++ {
-		if strings.Contains(target, string(i+'0')) {
-			return true
+	re, err := regexp.Compile("\\d")
+	if err != nil {
+		panic(err)
+	}
+
+	return re.MatchString(target)
+}
+
+func SortLayers(source []Component) []Component {
+	type node struct {
+		idx int
+		Output string
+	}
+
+	var result []Component	// result Content slice.
+	adj := make(map[string][]node)	// adjustment matrix of each nodes.
+
+	// setup adjustment matrix.
+	for idx, layer := range source {
+		// Input layer is always first.u
+		if layer.Type == "Input" {
+			result = append(result, layer)
+		} else {
+			if layer.Input != nil {
+				adj[*layer.Input] = append(adj[*layer.Input], node{ idx, *layer.Output })
+			}
 		}
 	}
-	return false
+
+	// Using BFS.
+	var q Queue
+	q.Push("Input")
+	for !q.Empty() {
+		current := q.Pop()
+		for _, next := range adj[current] {
+			q.Push(next.Output)
+			result = append(result, source[next.idx])
+		}
+	}
+
+	return result
 }
 
 // Generate Layer codes from content.json
 func GenLayers(content Content) []string {
 	var codes []string
 
+	layers := SortLayers(content.Layers)
+
 	// code converting
-	for _, d := range content.Layers {
+	for _, d := range layers {
 		layer := d.Name
 		layer += " = "
 		layer += category[d.Category] + "."
