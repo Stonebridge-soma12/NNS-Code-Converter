@@ -37,22 +37,6 @@ type Project struct {
 	Content Content `json:"content"`
 }
 
-type Queue struct {
-	item chan string
-}
-
-func (q *Queue) Push(val string) {
-	q.item <- val
-}
-
-func (q *Queue) Pop() string {
-	return <- q.item
-}
-
-func (q *Queue) Empty() bool {
-	return len(q.item) == 0
-}
-
 const ImportTF = "import tensorflow as tf\n\n"
 const TF = "tf"
 const Keras = ".keras"
@@ -76,31 +60,45 @@ func digitCheck(target string) bool {
 func SortLayers(source []Component) []Component {
 	type node struct {
 		idx int
-		Output string
+		Output *string
 	}
 
 	var result []Component	// result Content slice.
 	adj := make(map[string][]node)	// adjustment matrix of each nodes.
+	var inputIdx int
 
 	// setup adjustment matrix.
 	for idx, layer := range source {
 		// Input layer is always first.u
+		var input string
 		if layer.Type == "Input" {
-			result = append(result, layer)
+			inputIdx = idx
+
+			// result = append(result, layer)
+		}
+		input = layer.Name
+
+		var nodeSlice []node
+		if adj[input] == nil {
+			nodeSlice = append(nodeSlice, node{ idx, layer.Output })
+			adj[input] = nodeSlice
 		} else {
-			if layer.Input != nil {
-				adj[*layer.Input] = append(adj[*layer.Input], node{ idx, *layer.Output })
-			}
+			prev, _ := adj[input]
+			nodeSlice = prev
+			nodeSlice = append(nodeSlice, node{ idx, layer.Output })
+			adj[input] = nodeSlice
 		}
 	}
 
 	// Using BFS.
 	var q Queue
-	q.Push("Input")
+	q.Push(source[inputIdx].Name)
 	for !q.Empty() {
 		current := q.Pop()
 		for _, next := range adj[current] {
-			q.Push(next.Output)
+			if next.Output != nil {
+				q.Push(*next.Output)
+			}
 			result = append(result, source[next.idx])
 		}
 	}
