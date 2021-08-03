@@ -1,6 +1,8 @@
 package CodeGenerator
 
-import "testing"
+import (
+	"testing"
+)
 
 func TestGenerateModel(t *testing.T) {
 	type args struct {
