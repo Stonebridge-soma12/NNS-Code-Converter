@@ -38,11 +38,15 @@ type Project struct {
 	Content Content `json:"content"`
 }
 
-const ImportTF = "import tensorflow as tf\n\n"
-const TF = "tf"
-const Keras = ".keras"
-const Layer = ".layers"
-const Math = ".math"
+const (
+	ImportTF = "import tensorflow as tf\n\n"
+	TF = "tf"
+	Keras = ".keras"
+	Layer = ".layers"
+	Math = ".math"
+	CreateModel = "model = %s.Model(inputs=%s, outputs=%s)\n\n"
+)
+
 
 var category = map[string]string{
 	"Layer": TF + Keras + Layer,
@@ -120,8 +124,8 @@ func GenLayers(content Content) ([]string, error) {
 		layer += " = "
 		layer += category[d.Category] + "."
 		layer += d.Type
-		layer += "("
 
+		layer += "("
 		i := 1
 		for conf := range d.Config {
 			if d.Config[conf] == "" {
@@ -131,6 +135,7 @@ func GenLayers(content Content) ([]string, error) {
 
 			// if data is array like.
 			if strings.Contains(d.Config[conf], ",") {
+				// if tuple.
 				param = fmt.Sprintf("%s=(%s)", conf, d.Config[conf])
 			} else {
 				if digitCheck(d.Config[conf]) {
@@ -146,6 +151,7 @@ func GenLayers(content Content) ([]string, error) {
 			i++
 		}
 		layer += ")"
+
 		if d.Input != nil {
 			layer += fmt.Sprintf("(%s)\n", *d.Input)
 		} else {
@@ -156,7 +162,7 @@ func GenLayers(content Content) ([]string, error) {
 	}
 
 	// create model.
-	model := fmt.Sprintf("model = %s.Model(inputs=%s, outputs=%s)\n\n", TF+Keras, content.Input, content.Output)
+	model := fmt.Sprintf(CreateModel, TF+Keras, content.Input, content.Output)
 	codes = append(codes, model)
 
 	return codes, nil
@@ -167,7 +173,7 @@ func GenConfig(config Config) []string {
 	var codes []string
 
 	// get optimizer
-	optimizer := fmt.Sprintf("%s.optimizers.%s(lr=%f)", TF+Keras, config.Optimizer, config.LearningRate)
+	optimizer := fmt.Sprintf("%s.optimizers.%s(lr=%f)", TF+Keras, strings.Title(config.Optimizer), config.LearningRate)
 
 	// get metrics
 	var metrics string
@@ -213,5 +219,6 @@ func GenerateModel(config Config, content Content) error {
 		fileSize += n
 	}
 	fmt.Printf("Code converting is finish with %d bytes size\n", fileSize)
+
 	return nil
 }

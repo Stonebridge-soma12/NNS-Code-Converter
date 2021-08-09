@@ -4,3 +4,5 @@
 .idea/
 
 *.py
+
+*.json
