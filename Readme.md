@@ -12,11 +12,11 @@
     - padding - string (drop다운으로 선택하면 될듯)
   - AveragePooling2D
     - pool_size - tuple (n, n)
-    - strides - tuple (n, n) (None 가능)
+    - strides - tuple (n, n)
     - padding - string
   - MaxPool2D
     - pool_size - tuple (n, n)
-    - strides - tuple (n, n) (None 가능)
+    - strides - tuple (n, n)
     - padding -string
   - Activation
     - activation - string
