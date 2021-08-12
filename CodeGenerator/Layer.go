@@ -124,7 +124,7 @@ func (a *AveragePooling2D) ToCode() (string, error) {
 type MaxPool2D struct {
 	PoolSize [2]int `json:"pool_size"`
 	Strides  [2]int `json:"strides"`
-	Padding  [2]int `json:"padding"`
+	Padding  string `json:"padding"`
 }
 
 func (m *MaxPool2D) ToCode() (string, error) {
