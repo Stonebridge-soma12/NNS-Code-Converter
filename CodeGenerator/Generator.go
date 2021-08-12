@@ -32,6 +32,10 @@ type Module struct {
 	Param    Param   `json:"param"`
 }
 
+func (m *Module) ToCode() (string, error) {
+	return m.Param.ToCode(m.Type)
+}
+
 type Project struct {
 	Config  Config  `json:"config"`
 	Content Content `json:"content"`
@@ -113,41 +117,11 @@ func GenLayers(content Content) ([]string, error) {
 	for _, d := range layers {
 		layer := d.Name
 		layer += " = "
-		params, err := d.Param.ToCode(d.Type)
+		params, err := d.ToCode()
 		if err != nil {
 			return nil, err
 		}
 		layer += params
-		//layer += category[d.Category] + "."
-		//layer += d.Type
-		//
-		//layer += "("
-		//i := 1
-		//for conf := range d.Param {
-		//	if d.Param[conf] == "" {
-		//		return nil, errors.New("The value of layer config is empty")
-		//	}
-		//	var param string
-		//
-		//	// if data is array like.
-		//	if strings.Contains(d.Param[conf], ",") {
-		//		// if tuple.
-		//		param = fmt.Sprintf("%s=(%s)", conf, d.Param[conf])
-		//	} else {
-		//		if digitCheck(d.Param[conf]) {
-		//			param = fmt.Sprintf("%s=%s", conf, d.Param[conf])
-		//		} else {
-		//			param = fmt.Sprintf("%s=\"%s\"", conf, d.Param[conf])
-		//		}
-		//	}
-		//	layer += param
-		//	if i < len(d.Param) {
-		//		layer += ", "
-		//	}
-		//	i++
-		//}
-		//layer += ")"
-
 		if d.Input != nil {
 			layer += fmt.Sprintf("(%s)\n", *d.Input)
 		} else {
@@ -169,7 +143,7 @@ func GenConfig(config Config) []string {
 	var codes []string
 
 	// get optimizer
-	optimizer := fmt.Sprintf("%s.optimizers.%s(lr=%f)", tf+keras, strings.Title(config.Optimizer), config.LearningRate)
+	optimizer := fmt.Sprintf("%s.optimizers.%s(learning_rate=%g)", tf+keras, strings.Title(config.Optimizer), config.LearningRate)
 
 	// get metrics
 	var metrics string

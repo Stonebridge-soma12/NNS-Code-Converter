@@ -204,7 +204,7 @@ func (b BatchNormalization) ToCode() (string, error) {
 
 // Flatten
 type Flatten struct {
-
+	// Flatten has no parameter
 }
 
 func (f Flatten) ToCode() (string, error) {
