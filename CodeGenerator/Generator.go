@@ -1,7 +1,6 @@
 package CodeGenerator
 
 import (
-	"errors"
 	"fmt"
 	"os"
 	"regexp"
@@ -9,9 +8,9 @@ import (
 )
 
 type Content struct {
-	Output string      `json:"output"`
-	Input  string      `json:"input"`
-	Layers []Component `json:"layers"`
+	Output  string   `json:"output"`
+	Input   string   `json:"input"`
+	Modules []Module `json:"layers"`
 }
 
 type Config struct {
@@ -24,13 +23,13 @@ type Config struct {
 	Output       string   `json:"output"`
 }
 
-type Component struct {
-	Category string            `json:"category"`
-	Type     string            `json:"type"`
-	Name     string            `json:"name"`
-	Input    *string           `json:"input"`
-	Output   *string           `json:"output"`
-	Config   map[string]string `json:"config"`
+type Module struct {
+	Category string  `json:"category"`
+	Type     string  `json:"type"`
+	Name     string  `json:"name"`
+	Input    *string `json:"input"`
+	Output   *string `json:"output"`
+	Param    Param   `json:"param"`
 }
 
 type Project struct {
@@ -39,19 +38,11 @@ type Project struct {
 }
 
 const (
-	ImportTF = "import tensorflow as tf\n\n"
-	TF = "tf"
-	Keras = ".keras"
-	Layer = ".layers"
-	Math = ".math"
-	CreateModel = "model = %s.Model(inputs=%s, outputs=%s)\n\n"
+	importTf    = "import tensorflow as tf\n\n"
+	tf          = "tf"
+	keras       = ".keras"
+	createModel = "model = tf.keras.Model(inputs=%s, outputs=%s)\n\n"
 )
-
-
-var category = map[string]string{
-	"Layer": TF + Keras + Layer,
-	"Math":  TF + Math,
-}
 
 func digitCheck(target string) bool {
 	re, err := regexp.Compile("\\d")
@@ -62,15 +53,15 @@ func digitCheck(target string) bool {
 	return re.MatchString(target)
 }
 
-func SortLayers(source []Component) []Component {
+func SortLayers(source []Module) []Module {
 	// Sorting layer components via BFS.
 	type node struct {
-		idx int
+		idx    int
 		Output *string
 	}
 
-	var result []Component	// result Content slice.
-	adj := make(map[string][]node)	// adjustment matrix of each nodes.
+	var result []Module            // result Content slice.
+	adj := make(map[string][]node) // adjustment matrix of each nodes.
 	var inputIdx int
 
 	// setup adjustment matrix.
@@ -86,12 +77,12 @@ func SortLayers(source []Component) []Component {
 
 		var nodeSlice []node
 		if adj[input] == nil {
-			nodeSlice = append(nodeSlice, node{ idx, layer.Output })
+			nodeSlice = append(nodeSlice, node{idx, layer.Output})
 			adj[input] = nodeSlice
 		} else {
 			prev, _ := adj[input]
 			nodeSlice = prev
-			nodeSlice = append(nodeSlice, node{ idx, layer.Output })
+			nodeSlice = append(nodeSlice, node{idx, layer.Output})
 			adj[input] = nodeSlice
 		}
 	}
@@ -112,45 +103,50 @@ func SortLayers(source []Component) []Component {
 	return result
 }
 
-// Generate Layer codes from content.json
+// Generate layer codes from content.json
 func GenLayers(content Content) ([]string, error) {
 	var codes []string
 
-	layers := SortLayers(content.Layers)
+	layers := SortLayers(content.Modules)
 
 	// code converting
 	for _, d := range layers {
 		layer := d.Name
 		layer += " = "
-		layer += category[d.Category] + "."
-		layer += d.Type
-
-		layer += "("
-		i := 1
-		for conf := range d.Config {
-			if d.Config[conf] == "" {
-				return nil, errors.New("The value of layer config is empty")
-			}
-			var param string
-
-			// if data is array like.
-			if strings.Contains(d.Config[conf], ",") {
-				// if tuple.
-				param = fmt.Sprintf("%s=(%s)", conf, d.Config[conf])
-			} else {
-				if digitCheck(d.Config[conf]) {
-					param = fmt.Sprintf("%s=%s", conf, d.Config[conf])
-				} else {
-					param = fmt.Sprintf("%s=\"%s\"", conf, d.Config[conf])
-				}
-			}
-			layer += param
-			if i < len(d.Config) {
-				layer += ", "
-			}
-			i++
+		params, err := d.Param.ToCode(d.Type)
+		if err != nil {
+			return nil, err
 		}
-		layer += ")"
+		layer += params
+		//layer += category[d.Category] + "."
+		//layer += d.Type
+		//
+		//layer += "("
+		//i := 1
+		//for conf := range d.Param {
+		//	if d.Param[conf] == "" {
+		//		return nil, errors.New("The value of layer config is empty")
+		//	}
+		//	var param string
+		//
+		//	// if data is array like.
+		//	if strings.Contains(d.Param[conf], ",") {
+		//		// if tuple.
+		//		param = fmt.Sprintf("%s=(%s)", conf, d.Param[conf])
+		//	} else {
+		//		if digitCheck(d.Param[conf]) {
+		//			param = fmt.Sprintf("%s=%s", conf, d.Param[conf])
+		//		} else {
+		//			param = fmt.Sprintf("%s=\"%s\"", conf, d.Param[conf])
+		//		}
+		//	}
+		//	layer += param
+		//	if i < len(d.Param) {
+		//		layer += ", "
+		//	}
+		//	i++
+		//}
+		//layer += ")"
 
 		if d.Input != nil {
 			layer += fmt.Sprintf("(%s)\n", *d.Input)
@@ -162,7 +158,7 @@ func GenLayers(content Content) ([]string, error) {
 	}
 
 	// create model.
-	model := fmt.Sprintf(CreateModel, TF+Keras, content.Input, content.Output)
+	model := fmt.Sprintf(createModel, content.Input, content.Output)
 	codes = append(codes, model)
 
 	return codes, nil
@@ -173,7 +169,7 @@ func GenConfig(config Config) []string {
 	var codes []string
 
 	// get optimizer
-	optimizer := fmt.Sprintf("%s.optimizers.%s(lr=%f)", TF+Keras, strings.Title(config.Optimizer), config.LearningRate)
+	optimizer := fmt.Sprintf("%s.optimizers.%s(lr=%f)", tf+keras, strings.Title(config.Optimizer), config.LearningRate)
 
 	// get metrics
 	var metrics string
@@ -193,7 +189,7 @@ func GenConfig(config Config) []string {
 
 func GenerateModel(config Config, content Content) error {
 	var codes []string
-	codes = append(codes, ImportTF)
+	codes = append(codes, importTf)
 
 	Layers, err := GenLayers(content)
 	if err != nil {
