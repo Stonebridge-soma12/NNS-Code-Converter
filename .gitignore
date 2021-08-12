@@ -6,3 +6,5 @@
 *.py
 
 *.json
+
+MNIST/
