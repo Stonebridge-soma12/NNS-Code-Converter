@@ -1,6 +1,7 @@
 package CodeGenerator
 
 import (
+	"encoding/json"
 	"fmt"
 	"reflect"
 )
@@ -9,7 +10,7 @@ const (
 	conv2d       = `Conv2D(filters=%d, kernel_size=(%d, %d), strides=(%d, %d), padding="%s")`
 	dense        = `Dense(units=%d)`
 	avgPooling2d = `AveragePooling2D(pool_size=(%d, %d), strides=(%d, %d), padding="%s")`
-	maxPooling2d = `MaxPooling2D(pool_size=(%d, %d), strides=(%d, %d), padding="%s")`
+	maxPool2d = `MaxPooling2D(pool_size=(%d, %d), strides=(%d, %d), padding="%s")`
 	activation   = `Activation(activation="%s"`
 	input        = `Input(shape=(%s))`
 	dropout      = `Dropout(rate=%g)`
@@ -29,7 +30,33 @@ type Param struct {
 	Flatten
 }
 
-// Convert Module to code
+func UnmarshalModule(data map[string]json.RawMessage) (Module, error) {
+	var res Module
+	err := json.Unmarshal(data["category"], &res.Category)
+	if err != nil {
+		return res, err
+	}
+	err = json.Unmarshal(data["type"], &res.Type)
+	if err != nil {
+		return res, err
+	}
+	err = json.Unmarshal(data["name"], &res.Name)
+	if err != nil {
+		return res, err
+	}
+	err = json.Unmarshal(data["input"], &res.Input)
+	if err != nil {
+		return res, err
+	}
+	err = json.Unmarshal(data["output"], &res.Output)
+	if err != nil {
+		return res, err
+	}
+
+	return res, nil
+}
+
+// ToCode converting module to code.
 func (p *Param) ToCode(t string) (string, error) {
 	switch t {
 	case "Dense":
@@ -63,22 +90,21 @@ func checkNil(object interface{}) string {
 		value := e.Field(i)
 		tType := e.Type()
 
-		fmt.Println(tType.Name(), value.Interface())
-
-		if value.Interface() == nil {
-			errorString += fmt.Sprintf("field %s is nil\n", tType.Name())
+		// append error which field is nil
+		if reflect.ValueOf(value.Interface()).IsNil() {
+			errorString += fmt.Sprintf("field %s is nil\n", tType.Field(i).Name)
 		}
 	}
 
 	return errorString
 }
 
-// Convolution 2D layer
+// Conv2D Convolution 2D layer
 type Conv2D struct {
 	Filters    *int    `json:"filters"`
 	KernelSize []int   `json:"kernel_size"`
-	Strides    []int   `json:"strides"`
 	Padding    *string `json:"padding"`
+	Strides    []int   `json:"strides"`
 }
 
 func (c *Conv2D) ToCode() (string, error) {
@@ -90,7 +116,7 @@ func (c *Conv2D) ToCode() (string, error) {
 	return fmt.Sprintf(conv2d, *c.Filters, c.KernelSize[0], c.KernelSize[1], c.Strides[0], c.Strides[1], *c.Padding), nil
 }
 
-// Dense (Affain) layer
+// Dense (Affine) layer
 type Dense struct {
 	Units *int `json:"units"`
 }
@@ -104,11 +130,11 @@ func (d *Dense) ToCode() (string, error) {
 	return fmt.Sprintf(dense, *d.Units), nil
 }
 
-// Averaget pooling 2D layer
+// AveragePooling2D layer
 type AveragePooling2D struct {
-	PoolSize [2]int `json:"pool_size"`
-	Strides  [2]int `json:"strides"`
-	Padding  string `json:"padding"`
+	PoolSize []int `json:"pool_size"`
+	Strides  []int `json:"strides"`
+	Padding  *string `json:"padding"`
 }
 
 func (a *AveragePooling2D) ToCode() (string, error) {
@@ -117,14 +143,14 @@ func (a *AveragePooling2D) ToCode() (string, error) {
 		return "", fmt.Errorf(err)
 	}
 
-	return fmt.Sprintf(avgPooling2d, a.PoolSize[0], a.PoolSize[1], a.Strides[0], a.Strides[1], a.Padding), nil
+	return fmt.Sprintf(avgPooling2d, a.PoolSize[0], a.PoolSize[1], a.Strides[0], a.Strides[1], *a.Padding), nil
 }
 
-// Max pooling 2D layer
+// MaxPool2D layer
 type MaxPool2D struct {
-	PoolSize [2]int `json:"pool_size"`
-	Strides  [2]int `json:"strides"`
-	Padding  string `json:"padding"`
+	PoolSize []int `json:"pool_size"`
+	Strides  []int `json:"strides"`
+	Padding  *string `json:"padding"`
 }
 
 func (m *MaxPool2D) ToCode() (string, error) {
@@ -133,12 +159,12 @@ func (m *MaxPool2D) ToCode() (string, error) {
 		return "", fmt.Errorf(err)
 	}
 
-	return fmt.Sprintf(maxPooling2d, m.PoolSize[0], m.PoolSize[1], m.Strides[0], m.Strides[1], m.Padding), nil
+	return fmt.Sprintf(maxPool2d, m.PoolSize[0], m.PoolSize[1], m.Strides[0], m.Strides[1], *m.Padding), nil
 }
 
 // Activation
 type Activation struct {
-	Activation string `json:"Activation"`
+	Activation *string `json:"activation"`
 }
 
 func (a *Activation) ToCode() (string, error) {
@@ -147,7 +173,7 @@ func (a *Activation) ToCode() (string, error) {
 		return "", fmt.Errorf(err)
 	}
 
-	return fmt.Sprintf(activation, a.Activation), nil
+	return fmt.Sprintf(activation, *a.Activation), nil
 }
 
 // Input
@@ -190,7 +216,7 @@ func (d Dropout) ToCode() (string, error) {
 type BatchNormalization struct {
 	Axis     int     `json:"axis"`
 	Momentum float64 `json:"momentum"`
-	Epsilon  float64 `json:"Epsilon"`
+	Epsilon  float64 `json:"epsilon"`
 }
 
 func (b BatchNormalization) ToCode() (string, error) {

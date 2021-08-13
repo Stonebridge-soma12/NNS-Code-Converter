@@ -1,7 +1,9 @@
 package CodeGenerator
 
 import (
+	"encoding/json"
 	"fmt"
+	"net/http"
 	"os"
 	"regexp"
 	"strings"
@@ -33,7 +35,19 @@ type Module struct {
 }
 
 func (m *Module) ToCode() (string, error) {
-	return m.Param.ToCode(m.Type)
+	var result string
+	param, err := m.Param.ToCode(m.Type)
+
+	if m.Input != nil {
+		result += m.Name
+		result += " = "
+	}
+	result += tf + keras + "." + param
+	if m.Output != nil {
+		result += "(" + *m.Output + ")\n"
+	}
+
+	return result, err
 }
 
 type Project struct {
@@ -115,18 +129,18 @@ func GenLayers(content Content) ([]string, error) {
 
 	// code converting
 	for _, d := range layers {
-		layer := d.Name
-		layer += " = "
-		params, err := d.ToCode()
+		//layer := d.Name
+		//layer += " = "
+		layer, err := d.ToCode()
 		if err != nil {
 			return nil, err
 		}
-		layer += params
-		if d.Input != nil {
-			layer += fmt.Sprintf("(%s)\n", *d.Input)
-		} else {
-			layer += "\n"
-		}
+		//layer += params
+		//if d.Input != nil {
+		//	layer += fmt.Sprintf("(%s)\n", *d.Input)
+		//} else {
+		//	layer += "\n"
+		//}
 
 		codes = append(codes, layer)
 	}
@@ -191,4 +205,98 @@ func GenerateModel(config Config, content Content) error {
 	fmt.Printf("Code converting is finish with %d bytes size\n", fileSize)
 
 	return nil
+}
+
+func BindProject(r *http.Request) (*Project, error) {
+	project := new(Project)
+	data := make(map[string]json.RawMessage)
+	cc := make(map[string]json.RawMessage)
+	var layers []map[string]json.RawMessage
+
+	// Binding request body
+	err := json.NewDecoder(r.Body).Decode(&data)
+
+	if err != nil {
+		return nil, err
+	}
+
+	// Unmarshalling Config.
+	err = json.Unmarshal(data["config"], &project.Config)
+	if err != nil {
+		return nil, err
+	}
+
+	// Unmarshalling Content.
+	err = json.Unmarshal(data["content"], &cc)
+	if err != nil {
+		return nil, err
+	}
+
+	// Unmarshalling content input and output.
+	err = json.Unmarshal(cc["input"], &project.Content.Input)
+	if err != nil {
+		return nil, err
+	}
+	err = json.Unmarshal(cc["output"], &project.Content.Output)
+	if err != nil {
+		return nil, err
+	}
+
+	// Unmarshalling Modules.
+	err = json.Unmarshal(cc["layers"], &layers)
+
+	for _, layer := range layers {
+		// Unmarshalling module informations except parameters.
+		mod, err := UnmarshalModule(layer)
+		if err != nil {
+			return nil, err
+		}
+		switch mod.Type {
+		case "Conv2D":
+			err = json.Unmarshal(layer["param"], &mod.Param.Conv2D)
+			if err != nil {
+				return nil, err
+			}
+		case "Dense":
+			err = json.Unmarshal(layer["param"], &mod.Param.Dense)
+			if err != nil {
+				return nil, err
+			}
+		case "AveragePooling2D":
+			err = json.Unmarshal(layer["param"], &mod.Param.AveragePooling2D)
+			if err != nil {
+				return nil, err
+			}
+		case "MaxPool2D":
+			err = json.Unmarshal(layer["param"], &mod.Param.MaxPool2D)
+			if err != nil {
+				return nil, err
+			}
+		case "Activation":
+			err = json.Unmarshal(layer["param"], &mod.Param.Activation)
+			if err != nil {
+				return nil, err
+			}
+		case "Dropout":
+			err = json.Unmarshal(layer["param"], &mod.Param.Dropout)
+			if err != nil {
+				return nil, err
+			}
+		case "BatchNormalization":
+			err = json.Unmarshal(layer["param"], &mod.Param.BatchNormalization)
+			if err != nil {
+				return nil, err
+			}
+		case "Flatten":
+			err = json.Unmarshal(layer["param"], &mod.Param.Flatten)
+			if err != nil {
+				return nil, err
+			}
+		default:
+			return nil, fmt.Errorf("inavlid node type")
+		}
+		project.Content.Modules = append(project.Content.Modules, mod)
+	}
+
+	return project, nil
 }

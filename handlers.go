@@ -7,12 +7,9 @@ import (
 )
 
 func MakeModel (c echo.Context) error {
-	project := new(CodeGenerator.Project)
-
-	// binding JSON
-	err := c.Bind(project)
+	project, err := CodeGenerator.BindProject(c.Request())
 	if err != nil {
-		return c.String(http.StatusBadRequest, err.Error())
+		return c.String(http.StatusInternalServerError, err.Error())
 	}
 
 	err = CodeGenerator.GenerateModel(project.Config, project.Content)

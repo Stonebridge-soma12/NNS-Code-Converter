@@ -6,25 +6,7 @@ import (
 	"testing"
 )
 
-func TestGenerateModel(t *testing.T) {
-	type args struct {
-		config  Config
-		content Content
-	}
-	tests := []struct {
-		name string
-		args args
-	}{
-		// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-
-		})
-	}
-}
-
-func TestConv2D_ToCodest(t *testing.T) {
+func TestConv2D_ToCode(t *testing.T) {
 	filters := 16
 	padding := "same"
 	kernel := []int{16, 16}
@@ -33,8 +15,8 @@ func TestConv2D_ToCodest(t *testing.T) {
 	conv2D := &Conv2D{
 		&filters,
 		kernel,
-		strides,
 		&padding,
+		strides,
 	}
 	res, err := conv2D.ToCode()
 	if err != nil {
@@ -155,4 +137,5 @@ func TestUnmarshalParam(t *testing.T) {
 	if err := json.Unmarshal(data, &project); err != nil {
 		t.Error(err)
 	}
+	fmt.Print(project)
 }
