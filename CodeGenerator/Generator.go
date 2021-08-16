@@ -157,6 +157,9 @@ func (c *Config) GenConfig() ([]string, error) {
 	compile := fmt.Sprintf("model.compile(optimizer=%s, loss=\"%s\", metrics=[%s])\n", optimizer, c.Loss, metrics)
 	codes = append(codes, compile)
 
+	// Python comment.
+	codes = append(codes, "\n# Callback functions are below if use them.\n")
+
 	es, err := c.EarlyStopping.GenCode()
 	if err != nil {
 		return nil, err
