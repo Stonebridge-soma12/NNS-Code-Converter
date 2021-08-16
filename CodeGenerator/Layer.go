@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"reflect"
+	"strconv"
 )
 
 const (
@@ -11,7 +12,7 @@ const (
 	dense        = `Dense(units=%d)`
 	avgPooling2d = `AveragePooling2D(pool_size=(%d, %d), strides=(%d, %d), padding="%s")`
 	maxPool2d    = `MaxPool2D(pool_size=(%d, %d), strides=(%d, %d), padding="%s")`
-	activation   = `Activation(activation="%s"`
+	activation   = `Activation(activation="%s")`
 	input        = `Input(shape=(%s))`
 	dropout      = `Dropout(rate=%g)`
 	batchNorm    = `BatchNormalization(axis=%d, momentum=%g, epsilon=%g)`
@@ -59,6 +60,8 @@ func UnmarshalModule(data map[string]json.RawMessage) (Module, error) {
 // ToCode converting module to code.
 func (p *Param) ToCode(t string) (string, error) {
 	switch t {
+	case "Input":
+		return p.Input.ToCode()
 	case "Dense":
 		return p.Dense.ToCode()
 	case "Conv2D":
@@ -189,8 +192,8 @@ func (i *Input) ToCode() (string, error) {
 
 	var shape string
 	for idx := 0; idx < len(i.Shape); idx++ {
-		shape += string(rune(i.Shape[idx]))
-		if idx < idx-1 {
+		shape += strconv.Itoa(i.Shape[idx])
+		if idx < len(i.Shape)-1 {
 			shape += ", "
 		}
 	}
@@ -200,32 +203,32 @@ func (i *Input) ToCode() (string, error) {
 
 // Dropout
 type Dropout struct {
-	Rate float64 `json:"rate"`
+	Rate *float64 `json:"rate"`
 }
 
-func (d Dropout) ToCode() (string, error) {
+func (d *Dropout) ToCode() (string, error) {
 	err := checkNil(d)
 	if err != "" {
 		return "", fmt.Errorf(err)
 	}
 
-	return fmt.Sprintf(dropout, d.Rate), nil
+	return fmt.Sprintf(dropout, *d.Rate), nil
 }
 
 // BatchNormalization
 type BatchNormalization struct {
-	Axis     int     `json:"axis"`
-	Momentum float64 `json:"momentum"`
-	Epsilon  float64 `json:"epsilon"`
+	Axis     *int     `json:"axis"`
+	Momentum *float64 `json:"momentum"`
+	Epsilon  *float64 `json:"epsilon"`
 }
 
-func (b BatchNormalization) ToCode() (string, error) {
+func (b *BatchNormalization) ToCode() (string, error) {
 	err := checkNil(b)
 	if err != "" {
 		return "", fmt.Errorf(err)
 	}
 
-	return fmt.Sprintf(batchNorm, b.Axis, b.Momentum, b.Epsilon), nil
+	return fmt.Sprintf(batchNorm, *b.Axis, *b.Momentum, *b.Epsilon), nil
 }
 
 // Flatten

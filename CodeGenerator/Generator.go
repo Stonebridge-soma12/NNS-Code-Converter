@@ -28,13 +28,14 @@ func (m *Module) ToCode() (string, error) {
 	var result string
 	param, err := m.Param.ToCode(m.Type)
 
-	if m.Input != nil {
-		result += m.Name
-		result += " = "
-	}
+	result += m.Name
+	result += " = "
+
 	result += tf + keras + layers + "." + param
-	if m.Output != nil {
-		result += "(" + *m.Output + ")\n"
+	if m.Input != nil {
+		result += "(" + *m.Input + ")\n"
+	} else {
+		result += "\n"
 	}
 
 	return result, err
@@ -52,7 +53,7 @@ const (
 	layers        = ".layers"
 	createModel   = "model = tf.keras.Model(inputs=%s, outputs=%s)\n\n"
 	fitModel      = "model.fit(%s, %s, epochs=%d, batch_size=%d, validation_split=%g, callbacks=%s)\n"
-	remoteMonitor = tf + keras + ".callbacks.RemoteMonitor(root=%s, path=%s field='data', header=None, send_as_json=True)\n"
+	remoteMonitor = "remote_monitor = " + tf + keras + ".callbacks.RemoteMonitor(root='%s', path='%s', field='data', headers=None, send_as_json=True)\n"
 )
 
 func digitCheck(target string) bool {
@@ -172,6 +173,14 @@ func (c *Config) GenConfig() ([]string, error) {
 	}
 	codes = append(codes, lrr)
 
+	rm := fmt.Sprintf(
+		remoteMonitor,
+		"http://localohst:8080",
+		"/publish/epoch/end",
+	)
+
+	codes = append(codes, rm)
+
 	return codes, nil
 }
 
@@ -179,11 +188,7 @@ func (c *Config) GenFit() string {
 	// callbacks
 	var callbacks string
 	callbacks += "["
-	callbacks += fmt.Sprintf(
-		remoteMonitor,
-		"http://localohst:8080",
-		"/publish/epoch/end",
-	)
+	callbacks += "remote_monitor"
 	if *c.LearningRateReduction.Usage {
 		callbacks += ", learning_rate_reduction"
 	}
@@ -192,15 +197,7 @@ func (c *Config) GenFit() string {
 	}
 	callbacks += "]"
 
-	code := fmt.Sprintf(
-		fitModel,
-		"data",
-		"label",
-		c.Epochs,
-		c.BatchSize,
-		0.3,
-		callbacks,
-	)
+	code := fmt.Sprintf(fitModel, "data", "label", c.Epochs, c.BatchSize, 0.3, callbacks)
 
 	return code
 }
@@ -296,6 +293,11 @@ func BindProject(r *http.Request) (*Project, error) {
 			return nil, err
 		}
 		switch mod.Type {
+		case "Input":
+			err = json.Unmarshal(layer["param"], &mod.Param.Input)
+			if err != nil {
+				return nil, err
+			}
 		case "Conv2D":
 			err = json.Unmarshal(layer["param"], &mod.Param.Conv2D)
 			if err != nil {

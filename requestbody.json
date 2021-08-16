@@ -29,8 +29,8 @@
         "name": "node_1605430f35f94411aaf6b97eae005e19",
         "input": null,
         "output": "node_2fbbd8e5b0a5456faa2d47f7026b139f",
-        "config": {
-          "shape": ""
+        "param": {
+          "shape": [28, 28, 1]
         }
       },
       {
@@ -39,11 +39,11 @@
         "name": "node_2fbbd8e5b0a5456faa2d47f7026b139f",
         "input": "node_1605430f35f94411aaf6b97eae005e19",
         "output": "node_39ce8c39bacb4fb392c2372fb81a0b7e",
-        "config": {
-          "filters": "",
-          "kernel_size": "",
-          "padding": "",
-          "strides": ""
+        "param": {
+          "filters": 16,
+          "kernel_size": [16, 16],
+          "padding": "same",
+          "strides": [1, 1]
         }
       },
       {
@@ -52,8 +52,8 @@
         "name": "node_2c8a6d78d0204888942f16317f2a079f",
         "input": "node_39ce8c39bacb4fb392c2372fb81a0b7e",
         "output": "node_71914b8774b64700b38dc3e8e7a62caa",
-        "config": {
-          "rate": ""
+        "param": {
+          "rate": 0.5
         }
       },
       {
@@ -62,7 +62,7 @@
         "name": "node_39ce8c39bacb4fb392c2372fb81a0b7e",
         "input": "node_2fbbd8e5b0a5456faa2d47f7026b139f",
         "output": "node_2c8a6d78d0204888942f16317f2a079f",
-        "config": {
+        "param": {
           "activation": "relu"
         }
       },
@@ -72,7 +72,7 @@
         "name": "node_71914b8774b64700b38dc3e8e7a62caa",
         "input": "node_2c8a6d78d0204888942f16317f2a079f",
         "output": "node_020cdce94de241ac9556bb0b0022c1f2",
-        "config": {}
+        "param": {}
       },
       {
         "category": "Layer",
@@ -80,8 +80,8 @@
         "name": "node_020cdce94de241ac9556bb0b0022c1f2",
         "input": "node_71914b8774b64700b38dc3e8e7a62caa",
         "output": "node_96afcbc0a4ba4ed9b02b579068f166f0",
-        "config": {
-          "units": ""
+        "param": {
+          "units": 10
         }
       },
       {
@@ -90,7 +90,7 @@
         "name": "node_96afcbc0a4ba4ed9b02b579068f166f0",
         "input": "node_020cdce94de241ac9556bb0b0022c1f2",
         "output": null,
-        "config": {
+        "param": {
           "activation": "softmax"
         }
       }

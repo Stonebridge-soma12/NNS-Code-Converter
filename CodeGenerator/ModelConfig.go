@@ -3,8 +3,8 @@ package CodeGenerator
 import "fmt"
 
 const (
-	earlyStop   = "early_stop = tf.keras.callbacks.EarlyStopping(monitor=%s, patience=%d)\n"
-	lrReduction = "learning_rate_reduction = ReduceLROnPlateau(monitor=%s, patience=%d, verbose=1, factor=%g, min_lr=%g)\n"
+	earlyStop   = "early_stop = tf.keras.callbacks.EarlyStopping(monitor='%s', patience=%d)\n"
+	lrReduction = "learning_rate_reduction = tf.keras.callbacks.ReduceLROnPlateau(monitor='%s', patience=%d, verbose=1, factor=%g, min_lr=%g)\n"
 )
 
 type Config struct {

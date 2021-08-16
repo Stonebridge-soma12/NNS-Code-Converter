@@ -35,24 +35,27 @@
 - 클라이언트로 부터 받은 신경망 정보 JSON 파일
 
 ### Request body
+
 ```json
 {
-  "config": {
+  "param": {
     "optimizer": "adam",
     "learning_rate": 0.001,
     "loss": "sparse_categorical_crossentropy",
-    "metrics": ["accuracy"],
+    "metrics": [
+      "accuracy"
+    ],
     "batch_size": 32,
     "epochs": 10,
     "early_stop": {
       "usage": true,
       "monitor": "loss",
-      "patience": 2,
+      "patience": 2
     },
     "learning_rate_reduction": {
       "usage": true,
       "monitor": "val_accuracy",
-      "patience":2,
+      "patience": 2,
       "factor": 0.25,
       "min_lr": 0.0000003
     }
@@ -67,7 +70,7 @@
         "name": "node_1605430f35f94411aaf6b97eae005e19",
         "input": null,
         "output": "node_2fbbd8e5b0a5456faa2d47f7026b139f",
-        "config": {
+        "param": {
           "shape": ""
         }
       },
@@ -77,7 +80,7 @@
         "name": "node_2fbbd8e5b0a5456faa2d47f7026b139f",
         "input": "node_1605430f35f94411aaf6b97eae005e19",
         "output": "node_39ce8c39bacb4fb392c2372fb81a0b7e",
-        "config": {
+        "param": {
           "filters": "",
           "kernel_size": "",
           "padding": "",
@@ -90,7 +93,7 @@
         "name": "node_2c8a6d78d0204888942f16317f2a079f",
         "input": "node_39ce8c39bacb4fb392c2372fb81a0b7e",
         "output": "node_71914b8774b64700b38dc3e8e7a62caa",
-        "config": {
+        "param": {
           "rate": ""
         }
       },
@@ -100,7 +103,7 @@
         "name": "node_39ce8c39bacb4fb392c2372fb81a0b7e",
         "input": "node_2fbbd8e5b0a5456faa2d47f7026b139f",
         "output": "node_2c8a6d78d0204888942f16317f2a079f",
-        "config": {
+        "param": {
           "activation": "relu"
         }
       },
@@ -110,7 +113,7 @@
         "name": "node_71914b8774b64700b38dc3e8e7a62caa",
         "input": "node_2c8a6d78d0204888942f16317f2a079f",
         "output": "node_020cdce94de241ac9556bb0b0022c1f2",
-        "config": {}
+        "param": {}
       },
       {
         "category": "Layer",
@@ -118,7 +121,7 @@
         "name": "node_020cdce94de241ac9556bb0b0022c1f2",
         "input": "node_71914b8774b64700b38dc3e8e7a62caa",
         "output": "node_96afcbc0a4ba4ed9b02b579068f166f0",
-        "config": {
+        "param": {
           "units": ""
         }
       },
@@ -128,7 +131,7 @@
         "name": "node_96afcbc0a4ba4ed9b02b579068f166f0",
         "input": "node_020cdce94de241ac9556bb0b0022c1f2",
         "output": null,
-        "config": {
+        "param": {
           "activation": "softmax"
         }
       }
