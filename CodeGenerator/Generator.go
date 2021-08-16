@@ -15,16 +15,6 @@ type Content struct {
 	Modules []Module `json:"layers"`
 }
 
-type Config struct {
-	Optimizer    string   `json:"optimizer"`
-	LearningRate float64  `json:"learning_rate"`
-	Loss         string   `json:"loss"`
-	Metrics      []string `json:"metrics"`
-	BatchSize    int      `json:"batch_size"`
-	Epochs       int      `json:"epochs"`
-	Output       string   `json:"output"`
-}
-
 type Module struct {
 	Category string  `json:"category"`
 	Type     string  `json:"type"`
@@ -42,7 +32,7 @@ func (m *Module) ToCode() (string, error) {
 		result += m.Name
 		result += " = "
 	}
-	result += tf + keras + "." + param
+	result += tf + keras + layers + "." + param
 	if m.Output != nil {
 		result += "(" + *m.Output + ")\n"
 	}
@@ -59,8 +49,17 @@ const (
 	importTf    = "import tensorflow as tf\n\n"
 	tf          = "tf"
 	keras       = ".keras"
+	layers		= ".layers"
 	createModel = "model = tf.keras.Model(inputs=%s, outputs=%s)\n\n"
-)
+	fitModel = "model.fit(%s, %s, \n" +
+		"epochs=%d, \n" +
+		"batch_size=%d, \n" +
+		"validation_split=%g," +
+		"callbacks=%s)\n"
+	remoteMonitor = tf + keras + ".callbacks.RemoteMonitor(\n" +
+		"root=%s, path=%s field='data', header=None, send_as_json=True\n" +
+		")\n"
+	)
 
 func digitCheck(target string) bool {
 	re, err := regexp.Compile("\\d")
@@ -122,70 +121,118 @@ func SortLayers(source []Module) []Module {
 }
 
 // Generate layer codes from content.json
-func GenLayers(content Content) ([]string, error) {
+func (c *Content) GenLayers() ([]string, error) {
 	var codes []string
 
-	layers := SortLayers(content.Modules)
+	layers := SortLayers(c.Modules)
 
 	// code converting
 	for _, d := range layers {
-		//layer := d.Name
-		//layer += " = "
 		layer, err := d.ToCode()
 		if err != nil {
 			return nil, err
 		}
-		//layer += params
-		//if d.Input != nil {
-		//	layer += fmt.Sprintf("(%s)\n", *d.Input)
-		//} else {
-		//	layer += "\n"
-		//}
 
 		codes = append(codes, layer)
 	}
 
 	// create model.
-	model := fmt.Sprintf(createModel, content.Input, content.Output)
+	model := fmt.Sprintf(createModel, c.Input, c.Output)
 	codes = append(codes, model)
 
 	return codes, nil
 }
 
 // generate compile codes from config.json
-func GenConfig(config Config) []string {
+func (c *Config) GenConfig() ([]string, error) {
 	var codes []string
 
 	// get optimizer
-	optimizer := fmt.Sprintf("%s.optimizers.%s(learning_rate=%g)", tf+keras, strings.Title(config.Optimizer), config.LearningRate)
+	optimizer := fmt.Sprintf("%s.optimizers.%s(learning_rate=%g)", tf+keras, strings.Title(c.Optimizer), c.LearningRate)
 
 	// get metrics
 	var metrics string
-	for i := 1; i <= len(config.Metrics); i++ {
-		metrics += fmt.Sprintf("\"%s\"", config.Metrics[i-1])
-		if i < len(config.Metrics) {
+	for i := 1; i <= len(c.Metrics); i++ {
+		metrics += fmt.Sprintf("\"%s\"", c.Metrics[i-1])
+		if i < len(c.Metrics) {
 			metrics += ", "
 		}
 	}
 
 	// get compile
-	compile := fmt.Sprintf("model.compile(optimizer=%s, loss=\"%s\", metrics=[%s])\n", optimizer, config.Loss, metrics)
+	compile := fmt.Sprintf("model.compile(optimizer=%s, loss=\"%s\", metrics=[%s])\n", optimizer, c.Loss, metrics)
 	codes = append(codes, compile)
 
-	return codes
+	es, err := c.EarlyStopping.GenCode()
+	if err != nil {
+		return nil, err
+	}
+	codes = append(codes, es)
+
+	lrr, err := c.LearningRateReduction.GenCode()
+	if err != nil {
+		return nil, err
+	}
+	codes = append(codes, lrr)
+
+	return codes, nil
 }
 
-func GenerateModel(config Config, content Content) error {
+func (c *Config) GenFit() string {
+	// callbacks
+	var callbacks string
+	callbacks += "["
+	callbacks += fmt.Sprintf(
+		remoteMonitor,
+		"http://localohst:8080",
+		"/publish/epoch/end",
+		)
+	if c.LearningRateReduction.Usage {
+		callbacks += ", learning_rate_reduction"
+	}
+	if c.EarlyStopping.Usage {
+		callbacks += ", early_stop"
+	}
+	callbacks += "]"
+
+
+	code := fmt.Sprintf(
+		fitModel,
+		"data",
+		"label",
+		c.Epochs,
+		c.BatchSize,
+		0.3,
+		callbacks,
+		)
+
+	return code
+}
+
+func GenerateModel(config Config, content Content, fit bool) error {
+	// @ param fit
+	//	true => remote train.
+	//	false => extract python code from graph.
+
 	var codes []string
 	codes = append(codes, importTf)
 
-	Layers, err := GenLayers(content)
+	Layers, err := content.GenLayers()
 	if err != nil {
 		return err
 	}
 	codes = append(codes, Layers...)
 
-	codes = append(codes, GenConfig(config)...)
+	Configs, err := config.GenConfig()
+	if err != nil {
+		return err
+	}
+	codes = append(codes, Configs...)
+
+	// if request is remote train, add fit code
+	if fit {
+		codes = append(codes, config.GenFit())
+	}
 
 	// create python file
 	py, err := os.Create("model.py")
@@ -202,6 +249,7 @@ func GenerateModel(config Config, content Content) error {
 		}
 		fileSize += n
 	}
+
 	fmt.Printf("Code converting is finish with %d bytes size\n", fileSize)
 
 	return nil

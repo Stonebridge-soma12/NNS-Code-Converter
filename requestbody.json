@@ -5,7 +5,19 @@
     "loss": "sparse_categorical_crossentropy",
     "metrics": ["accuracy"],
     "batch_size": 32,
-    "epochs": 10
+    "epochs": 10,
+    "early_stop": {
+      "usage": true,
+      "monitor": "loss",
+      "patience": 2,
+    },
+    "learning_rate_reduction": {
+      "usage": true,
+      "monitor": "val_accuracy",
+      "patience":2,
+      "factor": 0.25,
+      "min_lr": 0.0000003
+    }
   },
   "content": {
     "output": "node_96afcbc0a4ba4ed9b02b579068f166f0",

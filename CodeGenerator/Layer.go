@@ -10,7 +10,7 @@ const (
 	conv2d       = `Conv2D(filters=%d, kernel_size=(%d, %d), strides=(%d, %d), padding="%s")`
 	dense        = `Dense(units=%d)`
 	avgPooling2d = `AveragePooling2D(pool_size=(%d, %d), strides=(%d, %d), padding="%s")`
-	maxPool2d = `MaxPooling2D(pool_size=(%d, %d), strides=(%d, %d), padding="%s")`
+	maxPool2d    = `MaxPool2D(pool_size=(%d, %d), strides=(%d, %d), padding="%s")`
 	activation   = `Activation(activation="%s"`
 	input        = `Input(shape=(%s))`
 	dropout      = `Dropout(rate=%g)`
@@ -132,8 +132,8 @@ func (d *Dense) ToCode() (string, error) {
 
 // AveragePooling2D layer
 type AveragePooling2D struct {
-	PoolSize []int `json:"pool_size"`
-	Strides  []int `json:"strides"`
+	PoolSize []int   `json:"pool_size"`
+	Strides  []int   `json:"strides"`
 	Padding  *string `json:"padding"`
 }
 
@@ -148,8 +148,8 @@ func (a *AveragePooling2D) ToCode() (string, error) {
 
 // MaxPool2D layer
 type MaxPool2D struct {
-	PoolSize []int `json:"pool_size"`
-	Strides  []int `json:"strides"`
+	PoolSize []int   `json:"pool_size"`
+	Strides  []int   `json:"strides"`
 	Padding  *string `json:"padding"`
 }
 

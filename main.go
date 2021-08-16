@@ -19,6 +19,7 @@ func main() {
 	})
 
 	e.POST("/make-python", MakeModel)
+	e.POST("/publish/epoch/end", TrainMonitor)
 
 	e.Logger.Fatal(e.Start(":8080"))
 }
