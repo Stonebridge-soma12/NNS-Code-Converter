@@ -4,12 +4,7 @@ import "fmt"
 
 const (
 	earlyStop   = "early_stop = tf.keras.callbacks.EarlyStopping(monitor=%s, patience=%d)\n"
-	lrReduction = "learning_rate_reduction = ReduceLROnPlateau(" +
-		"monitor=%s,\n" +
-		"patience=%d," +
-		"\nverbose=1," +
-		"\nfactor=%g," +
-		"\nmin_lr=%g)\n"
+	lrReduction = "learning_rate_reduction = ReduceLROnPlateau(monitor=%s, patience=%d, verbose=1, factor=%g, min_lr=%g)\n"
 )
 
 type Config struct {
@@ -26,7 +21,7 @@ type Config struct {
 
 // EarlyStop struct.
 type EarlyStop struct {
-	Usage    bool    `json:"usage"`
+	Usage    *bool   `json:"usage"`
 	Monitor  *string `json:"monitor"`
 	Patience *int    `json:"patience"`
 }
@@ -34,7 +29,7 @@ type EarlyStop struct {
 // EarlyStop generate code.
 func (e *EarlyStop) GenCode() (string, error) {
 	// if not use early stopping return empty string.
-	if !e.Usage {
+	if !*e.Usage {
 		return "", nil
 	}
 
@@ -49,8 +44,8 @@ func (e *EarlyStop) GenCode() (string, error) {
 
 // Learning Rate Reduction struct
 type LrReduction struct {
-	Usage    bool     `json:"usage"`
-	Monitor  *string  `json:"val_accuracy"`
+	Usage    *bool    `json:"usage"`
+	Monitor  *string  `json:"monitor"`
 	Patience *int     `json:"patience"`
 	Factor   *float64 `json:"factor"`
 	MinLr    *float64 `json:"min_lr"`
@@ -59,7 +54,7 @@ type LrReduction struct {
 // LrReduction generate code.
 func (l *LrReduction) GenCode() (string, error) {
 	// if not using learning rate reduction return empty string.
-	if !l.Usage {
+	if !*l.Usage {
 		return "", nil
 	}
 

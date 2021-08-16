@@ -9,7 +9,7 @@
     "early_stop": {
       "usage": true,
       "monitor": "loss",
-      "patience": 2,
+      "patience": 2
     },
     "learning_rate_reduction": {
       "usage": true,

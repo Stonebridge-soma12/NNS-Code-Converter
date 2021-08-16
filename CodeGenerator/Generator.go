@@ -46,20 +46,14 @@ type Project struct {
 }
 
 const (
-	importTf    = "import tensorflow as tf\n\n"
-	tf          = "tf"
-	keras       = ".keras"
-	layers		= ".layers"
-	createModel = "model = tf.keras.Model(inputs=%s, outputs=%s)\n\n"
-	fitModel = "model.fit(%s, %s, \n" +
-		"epochs=%d, \n" +
-		"batch_size=%d, \n" +
-		"validation_split=%g," +
-		"callbacks=%s)\n"
-	remoteMonitor = tf + keras + ".callbacks.RemoteMonitor(\n" +
-		"root=%s, path=%s field='data', header=None, send_as_json=True\n" +
-		")\n"
-	)
+	importTf      = "import tensorflow as tf\n\n"
+	tf            = "tf"
+	keras         = ".keras"
+	layers        = ".layers"
+	createModel   = "model = tf.keras.Model(inputs=%s, outputs=%s)\n\n"
+	fitModel      = "model.fit(%s, %s, epochs=%d, batch_size=%d, validation_split=%g, callbacks=%s)\n"
+	remoteMonitor = tf + keras + ".callbacks.RemoteMonitor(root=%s, path=%s field='data', header=None, send_as_json=True)\n"
+)
 
 func digitCheck(target string) bool {
 	re, err := regexp.Compile("\\d")
@@ -186,15 +180,14 @@ func (c *Config) GenFit() string {
 		remoteMonitor,
 		"http://localohst:8080",
 		"/publish/epoch/end",
-		)
-	if c.LearningRateReduction.Usage {
+	)
+	if *c.LearningRateReduction.Usage {
 		callbacks += ", learning_rate_reduction"
 	}
-	if c.EarlyStopping.Usage {
+	if *c.EarlyStopping.Usage {
 		callbacks += ", early_stop"
 	}
 	callbacks += "]"
-
 
 	code := fmt.Sprintf(
 		fitModel,
@@ -204,7 +197,7 @@ func (c *Config) GenFit() string {
 		c.BatchSize,
 		0.3,
 		callbacks,
-		)
+	)
 
 	return code
 }
