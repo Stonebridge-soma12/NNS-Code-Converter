@@ -8,10 +8,12 @@ import (
 )
 
 const (
-	conv2d       = `Conv2D(filters=%d, kernel_size=(%d, %d), strides=(%d, %d), padding="%s")`
+	conv1d       = `Conv1D(filters=%d, kernel_size=%d, strides=%d, padding='%s')`
+	conv2d       = `Conv2D(filters=%d, kernel_size=(%d, %d), strides=(%d, %d), padding='%s')`
 	dense        = `Dense(units=%d)`
-	avgPooling2d = `AveragePooling2D(pool_size=(%d, %d), strides=(%d, %d), padding="%s")`
-	maxPool2d    = `MaxPool2D(pool_size=(%d, %d), strides=(%d, %d), padding="%s")`
+	avgPooling1d = `AveragePooling1D(pool_size=%d, strides=%d, padding='%s')`
+	avgPooling2d = `AveragePooling2D(pool_size=(%d, %d), strides=(%d, %d), padding='%s')`
+	maxPool2d    = `MaxPool2D(pool_size=(%d, %d), strides=(%d, %d), padding='%s')`
 	activation   = `Activation(activation="%s")`
 	input        = `Input(shape=(%s))`
 	dropout      = `Dropout(rate=%g)`
@@ -84,7 +86,9 @@ func (p *Param) ToCode(t string) (string, error) {
 }
 
 // For check there is any empty fields in Param
-func checkNil(object interface{}) string {
+func checkNil(object interface{}) error {
+	// Parameter object MUST BE POINTER STRUCT
+
 	errorString := ""
 
 	e := reflect.ValueOf(object).Elem()
@@ -99,7 +103,11 @@ func checkNil(object interface{}) string {
 		}
 	}
 
-	return errorString
+	if errorString == "" {
+		return nil
+	}
+
+	return fmt.Errorf(errorString)
 }
 
 // Conv2D Convolution 2D layer
@@ -112,8 +120,8 @@ type Conv2D struct {
 
 func (c *Conv2D) ToCode() (string, error) {
 	err := checkNil(c)
-	if err != "" {
-		return "", fmt.Errorf(err)
+	if err != nil {
+		return "", err
 	}
 
 	return fmt.Sprintf(conv2d, *c.Filters, c.KernelSize[0], c.KernelSize[1], c.Strides[0], c.Strides[1], *c.Padding), nil
@@ -126,8 +134,8 @@ type Dense struct {
 
 func (d *Dense) ToCode() (string, error) {
 	err := checkNil(d)
-	if err != "" {
-		return "", fmt.Errorf(err)
+	if err != nil {
+		return "", err
 	}
 
 	return fmt.Sprintf(dense, *d.Units), nil
@@ -142,8 +150,8 @@ type AveragePooling2D struct {
 
 func (a *AveragePooling2D) ToCode() (string, error) {
 	err := checkNil(a)
-	if err != "" {
-		return "", fmt.Errorf(err)
+	if err != nil {
+		return "", err
 	}
 
 	return fmt.Sprintf(avgPooling2d, a.PoolSize[0], a.PoolSize[1], a.Strides[0], a.Strides[1], *a.Padding), nil
@@ -158,8 +166,8 @@ type MaxPool2D struct {
 
 func (m *MaxPool2D) ToCode() (string, error) {
 	err := checkNil(m)
-	if err != "" {
-		return "", fmt.Errorf(err)
+	if err != nil {
+		return "", err
 	}
 
 	return fmt.Sprintf(maxPool2d, m.PoolSize[0], m.PoolSize[1], m.Strides[0], m.Strides[1], *m.Padding), nil
@@ -172,8 +180,8 @@ type Activation struct {
 
 func (a *Activation) ToCode() (string, error) {
 	err := checkNil(a)
-	if err != "" {
-		return "", fmt.Errorf(err)
+	if err != nil {
+		return "", err
 	}
 
 	return fmt.Sprintf(activation, *a.Activation), nil
@@ -186,8 +194,8 @@ type Input struct {
 
 func (i *Input) ToCode() (string, error) {
 	err := checkNil(i)
-	if err != "" {
-		return "", fmt.Errorf(err)
+	if err != nil {
+		return "", err
 	}
 
 	var shape string
@@ -208,8 +216,8 @@ type Dropout struct {
 
 func (d *Dropout) ToCode() (string, error) {
 	err := checkNil(d)
-	if err != "" {
-		return "", fmt.Errorf(err)
+	if err != nil {
+		return "", err
 	}
 
 	return fmt.Sprintf(dropout, *d.Rate), nil
@@ -224,8 +232,8 @@ type BatchNormalization struct {
 
 func (b *BatchNormalization) ToCode() (string, error) {
 	err := checkNil(b)
-	if err != "" {
-		return "", fmt.Errorf(err)
+	if err != nil {
+		return "", err
 	}
 
 	return fmt.Sprintf(batchNorm, *b.Axis, *b.Momentum, *b.Epsilon), nil

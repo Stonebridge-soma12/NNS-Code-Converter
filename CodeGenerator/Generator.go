@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"os"
 	"regexp"
-	"strings"
 )
 
 type Content struct {
@@ -48,7 +47,9 @@ type Project struct {
 
 const (
 	importTf      = "import tensorflow as tf\n\n"
+	importTfa     = "import tensorflow_addons as tfa\n\n"
 	tf            = "tf"
+	tfa           = "tfa"
 	keras         = ".keras"
 	layers        = ".layers"
 	createModel   = "model = tf.keras.Model(inputs=%s, outputs=%s)\n\n"
@@ -143,7 +144,10 @@ func (c *Config) GenConfig() ([]string, error) {
 	var codes []string
 
 	// get optimizer
-	optimizer := fmt.Sprintf("%s.optimizers.%s(learning_rate=%g)", tf+keras, strings.Title(c.Optimizer), c.LearningRate)
+	optimizer, err := c.OptimizerConfig.ToCode(c.OptimizerName)
+	if err != nil {
+		return nil, err
+	}
 
 	// get metrics
 	var metrics string
@@ -209,6 +213,7 @@ func GenerateModel(config Config, content Content, fit bool) error {
 
 	var codes []string
 	codes = append(codes, importTf)
+	codes = append(codes, importTfa)
 
 	Layers, err := content.GenLayers()
 	if err != nil {
@@ -262,7 +267,13 @@ func BindProject(r *http.Request) (*Project, error) {
 	}
 
 	// Unmarshalling Config.
-	err = json.Unmarshal(data["config"], &project.Config)
+	var config map[string]json.RawMessage
+	err = json.Unmarshal(data["config"], &config)
+	if err != nil {
+		return nil, err
+	}
+
+	err = project.Config.UnmarshalConfig(config)
 	if err != nil {
 		return nil, err
 	}

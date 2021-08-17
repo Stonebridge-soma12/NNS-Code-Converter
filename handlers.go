@@ -67,5 +67,8 @@ func Fit(c echo.Context) error {
 		fmt.Println(err)
 	}
 
+	// zip model and serving
+
+
 	return nil
 }

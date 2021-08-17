@@ -1,8 +1,12 @@
 # Code converter
 - 그래프 형식으로 그린 신경망을 파이썬 코드로 변환시키는 모듈.
 
+#### v1.1 (2021-08-17)
+- Optimizer 종류 추가
+
 # Supports
 ### [Tensorflow-Keras](https://www.tensorflow.org/?hl=ko)
+### Layer
   - Dense
     - units - integer
   - Conv2D
@@ -30,6 +34,54 @@
     - epsilon - float
   - Flatten
 
+### Optimizer
+- Adadelta
+    - learning_rate - float
+    - weight_decay - float
+    - epsilon - float
+- Adagrad
+    - learning_rate - float
+    - initial_accumulator_value - float
+    - epsilon - float
+- Adam
+    - learning_rate - float
+    - beta_1 - float
+    - beta_2 - float
+    - epsilon - float
+    - amsgrad - boolean : default - false
+- Adamax
+    - learning_rate - float
+    - beta_1 - float
+    - beta_2 - float
+    - epsilon - float
+- Nadam
+    - learning_rate - float
+    - beta_1 - float
+    - beta_2 - float
+    - epsilon - float
+- RMSprop
+    - learning_rate - float
+    - decay - float
+    - momentum - float
+    - epsilon - float
+    - centered - boolean : default - false
+- SGD
+    - learning_rate - float
+    - momentum - float
+    - nesterov - boolean : default - false
+- AdamW
+    - weight_decay - float
+    - learning_rate - float
+    - beta_1 - float
+    - beta_2 - float
+    - epsilon - float
+    - amsgrad - boolean : default - false
+- SGDW
+    - weight_decay - float
+    - learning_rate - float
+    - momentum - float
+    - nesterov - boolean : default - false
+
 
 ## 실행 예시
 - 클라이언트로 부터 받은 신경망 정보 JSON 파일
@@ -38,9 +90,15 @@
 
 ```json
 {
-  "param": {
-    "optimizer": "adam",
-    "learning_rate": 0.001,
+  "config": {
+    "optimizer_name": "Adam",
+    "optimizer_config": {
+      "learning_rate": 0.001,
+      "beta_1": 0.9,
+      "beta_2": 0.999,
+      "epsilon": 1e-07,
+      "amsgrad": false
+    },
     "loss": "sparse_categorical_crossentropy",
     "metrics": [
       "accuracy"
@@ -71,7 +129,11 @@
         "input": null,
         "output": "node_2fbbd8e5b0a5456faa2d47f7026b139f",
         "param": {
-          "shape": ""
+          "shape": [
+            28,
+            28,
+            1
+          ]
         }
       },
       {
@@ -81,10 +143,16 @@
         "input": "node_1605430f35f94411aaf6b97eae005e19",
         "output": "node_39ce8c39bacb4fb392c2372fb81a0b7e",
         "param": {
-          "filters": "",
-          "kernel_size": "",
-          "padding": "",
-          "strides": ""
+          "filters": 16,
+          "kernel_size": [
+            16,
+            16
+          ],
+          "padding": "same",
+          "strides": [
+            1,
+            1
+          ]
         }
       },
       {
@@ -94,7 +162,7 @@
         "input": "node_39ce8c39bacb4fb392c2372fb81a0b7e",
         "output": "node_71914b8774b64700b38dc3e8e7a62caa",
         "param": {
-          "rate": ""
+          "rate": 0.5
         }
       },
       {
@@ -122,7 +190,7 @@
         "input": "node_71914b8774b64700b38dc3e8e7a62caa",
         "output": "node_96afcbc0a4ba4ed9b02b579068f166f0",
         "param": {
-          "units": ""
+          "units": 10
         }
       },
       {
@@ -138,24 +206,29 @@
     ]
   }
 }
-
 ```
 
 - 변환된 Python 코드
 ```python
 import tensorflow as tf
 
-node_1605430f35f94411aaf6b97eae005e19 = tf.keras.layers.Input(shape="")
-node_2fbbd8e5b0a5456faa2d47f7026b139f = tf.keras.layers.Conv2D(filters="", kernel_size="", padding="", strides="")(node_1605430f35f94411aaf6b97eae005e19)
+import tensorflow_addons as tfa
+
+node_1605430f35f94411aaf6b97eae005e19 = tf.keras.layers.Input(shape=(28, 28, 1))
+node_2fbbd8e5b0a5456faa2d47f7026b139f = tf.keras.layers.Conv2D(filters=16, kernel_size=(16, 16), strides=(1, 1), padding='same')(node_1605430f35f94411aaf6b97eae005e19)
 node_39ce8c39bacb4fb392c2372fb81a0b7e = tf.keras.layers.Activation(activation="relu")(node_2fbbd8e5b0a5456faa2d47f7026b139f)
-node_2c8a6d78d0204888942f16317f2a079f = tf.keras.layers.Dropout(rate="")(node_39ce8c39bacb4fb392c2372fb81a0b7e)
+node_2c8a6d78d0204888942f16317f2a079f = tf.keras.layers.Dropout(rate=0.5)(node_39ce8c39bacb4fb392c2372fb81a0b7e)
 node_71914b8774b64700b38dc3e8e7a62caa = tf.keras.layers.Flatten()(node_2c8a6d78d0204888942f16317f2a079f)
-node_020cdce94de241ac9556bb0b0022c1f2 = tf.keras.layers.Dense(units="")(node_71914b8774b64700b38dc3e8e7a62caa)
+node_020cdce94de241ac9556bb0b0022c1f2 = tf.keras.layers.Dense(units=10)(node_71914b8774b64700b38dc3e8e7a62caa)
 node_96afcbc0a4ba4ed9b02b579068f166f0 = tf.keras.layers.Activation(activation="softmax")(node_020cdce94de241ac9556bb0b0022c1f2)
 model = tf.keras.Model(inputs=node_1605430f35f94411aaf6b97eae005e19, outputs=node_96afcbc0a4ba4ed9b02b579068f166f0)
 
-model.compile(optimizer=tf.keras.optimizers.adam(lr=0.001000), loss="sparse_categorical_crossentropy", metrics=["accuracy"])
+model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=0.001, beta_1=0.9, beta_2=0.999, epsilon=1e-07, amsgrad=False), loss="sparse_categorical_crossentropy", metrics=["accuracy"])
 
+# Callback functions are below if use them.
+early_stop = tf.keras.callbacks.EarlyStopping(monitor='loss', patience=2)
+learning_rate_reduction = tf.keras.callbacks.ReduceLROnPlateau(monitor='val_accuracy', patience=2, verbose=1, factor=0.25, min_lr=3e-07)
+remote_monitor = tf.keras.callbacks.RemoteMonitor(root='http://localohst:8080', path='/publish/epoch/end', field='data', headers=None, send_as_json=True)
 ```
 
 > Requestbody로 넘어오는 레이어의 순서와 실제 순서가 다를 수 있기 때문에 서버에서 한 번 정렬해 준 후 코드로 변환된다.
