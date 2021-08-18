@@ -15,13 +15,23 @@ func MakeModel(c echo.Context) error {
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
 
-	err = CodeGenerator.GenerateModel(project.Config, project.Content, false)
+	err = CodeGenerator.GenerateModel(project.Config, project.Content)
 	if err != nil {
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
 
-	// return fIle.
-	return c.Attachment("./model.py", "model.py")
+	// Attach result python file
+	err = c.Attachment("./model.py", "model.py")
+	if err != nil {
+		return err
+	}
+
+	err = os.Remove("./model.py")
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // For testing Keras remote monitor
@@ -53,12 +63,17 @@ func Fit(c echo.Context) error {
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
 
-	err = CodeGenerator.GenerateModel(project.Config, project.Content, true)
+	err = CodeGenerator.GenerateModel(project.Config, project.Content)
 	if err != nil {
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
 
-	cmd := exec.Command("python", "./model.py")
+	err = project.Config.GenFit()
+	if err != nil {
+		return c.String(http.StatusInternalServerError, err.Error())
+	}
+
+	cmd := exec.Command("python", "./train.py")
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 
@@ -68,7 +83,6 @@ func Fit(c echo.Context) error {
 	}
 
 	// zip model and serving
-
 
 	return nil
 }

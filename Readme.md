@@ -5,6 +5,7 @@
 - Optimizer 종류 추가
 #### v1.11 (2021-08-17)
 - Rescaling, Reshape 레이어 추가
+- 모델 학습코드 파일 별도 생성하도록 수정
 
 # Supports
 ### [Tensorflow-Keras](https://www.tensorflow.org/?hl=ko)
@@ -216,7 +217,8 @@
 }
 ```
 
-- 변환된 Python 코드
+### 변환된 Python 코드
+- /make-python - model.py
 ```python
 import tensorflow as tf
 
@@ -232,11 +234,23 @@ node_96afcbc0a4ba4ed9b02b579068f166f0 = tf.keras.layers.Activation(activation="s
 model = tf.keras.Model(inputs=node_1605430f35f94411aaf6b97eae005e19, outputs=node_96afcbc0a4ba4ed9b02b579068f166f0)
 
 model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=0.001, beta_1=0.9, beta_2=0.999, epsilon=1e-07, amsgrad=False), loss="sparse_categorical_crossentropy", metrics=["accuracy"])
+```
+- /fit - train.py
+```python
+import tensorflow as tf
+
+import tensorflow_addons as tfa
+
+import model
+
 
 # Callback functions are below if use them.
 early_stop = tf.keras.callbacks.EarlyStopping(monitor='loss', patience=2)
 learning_rate_reduction = tf.keras.callbacks.ReduceLROnPlateau(monitor='val_accuracy', patience=2, verbose=1, factor=0.25, min_lr=3e-07)
 remote_monitor = tf.keras.callbacks.RemoteMonitor(root='http://localohst:8080', path='/publish/epoch/end', field='data', headers=None, send_as_json=True)
+
+model.model.fit(data, label, epochs=10, batch_size=32, validation_split=0.3, callbacks=[remote_monitor, learning_rate_reduction, early_stop])
+
 ```
 
 > Requestbody로 넘어오는 레이어의 순서와 실제 순서가 다를 수 있기 때문에 서버에서 한 번 정렬해 준 후 코드로 변환된다.

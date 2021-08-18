@@ -53,7 +53,7 @@ const (
 	keras         = ".keras"
 	layers        = ".layers"
 	createModel   = "model = tf.keras.Model(inputs=%s, outputs=%s)\n\n"
-	fitModel      = "model.fit(%s, %s, epochs=%d, batch_size=%d, validation_split=%g, callbacks=%s)\n"
+	fitModel      = "model.model.fit(%s, %s, epochs=%d, batch_size=%d, validation_split=%g, callbacks=%s)\n"
 	remoteMonitor = "remote_monitor = " + tf + keras + ".callbacks.RemoteMonitor(root='%s', path='%s', field='data', headers=None, send_as_json=True)\n"
 )
 
@@ -162,18 +162,27 @@ func (c *Config) GenConfig() ([]string, error) {
 	compile := fmt.Sprintf("model.compile(optimizer=%s, loss=\"%s\", metrics=[%s])\n", optimizer, c.Loss, metrics)
 	codes = append(codes, compile)
 
+	return codes, nil
+}
+
+func (c *Config) GenFit() error {
+	var codes []string
+	codes = append(codes, importTf)
+	codes = append(codes, importTfa)
+	codes = append(codes, "import model\n\n")
+
 	// Python comment.
 	codes = append(codes, "\n# Callback functions are below if use them.\n")
 
 	es, err := c.EarlyStopping.GenCode()
 	if err != nil {
-		return nil, err
+		return err
 	}
 	codes = append(codes, es)
 
 	lrr, err := c.LearningRateReduction.GenCode()
 	if err != nil {
-		return nil, err
+		return err
 	}
 	codes = append(codes, lrr)
 
@@ -184,11 +193,9 @@ func (c *Config) GenConfig() ([]string, error) {
 	)
 
 	codes = append(codes, rm)
+	// add blank line
+	codes = append(codes, "\n")
 
-	return codes, nil
-}
-
-func (c *Config) GenFit() string {
 	// callbacks
 	var callbacks string
 	callbacks += "["
@@ -201,16 +208,31 @@ func (c *Config) GenFit() string {
 	}
 	callbacks += "]"
 
-	code := fmt.Sprintf(fitModel, "data", "label", c.Epochs, c.BatchSize, 0.3, callbacks)
+	fitCode := fmt.Sprintf(fitModel, "data", "label", c.Epochs, c.BatchSize, 0.3, callbacks)
+	codes = append(codes, fitCode)
 
-	return code
+	// Generate train python file
+	py, err := os.Create("train.py")
+	if err != nil {
+		return err
+	}
+	defer py.Close()
+
+	fileSize := 0
+	for _, code := range codes {
+		n, err := py.Write([]byte(code))
+		if err != nil {
+			return err
+		}
+		fileSize += n
+	}
+
+	fmt.Printf("Generate train python file with size %d bytes.\n", fileSize)
+
+	return nil
 }
 
-func GenerateModel(config Config, content Content, fit bool) error {
-	// @ param fit
-	//	true => remote train.
-	//	false => extract python code from graph.
-
+func GenerateModel(config Config, content Content) error {
 	var codes []string
 	codes = append(codes, importTf)
 	codes = append(codes, importTfa)
@@ -226,11 +248,6 @@ func GenerateModel(config Config, content Content, fit bool) error {
 		return err
 	}
 	codes = append(codes, Configs...)
-
-	// if request is remote train, add fit code
-	if fit {
-		codes = append(codes, config.GenFit())
-	}
 
 	// create python file
 	py, err := os.Create("model.py")
@@ -248,7 +265,7 @@ func GenerateModel(config Config, content Content, fit bool) error {
 		fileSize += n
 	}
 
-	fmt.Printf("Code converting is finish with %d bytes size\n", fileSize)
+	fmt.Printf("Convert model with size %d bytes.\n", fileSize)
 
 	return nil
 }
