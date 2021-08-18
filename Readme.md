@@ -3,6 +3,8 @@
 
 #### v1.1 (2021-08-17)
 - Optimizer 종류 추가
+#### v1.11 (2021-08-17)
+- Rescaling, Reshape 레이어 추가
 
 # Supports
 ### [Tensorflow-Keras](https://www.tensorflow.org/?hl=ko)
