@@ -19,6 +19,8 @@ const (
 	dropout      = `Dropout(rate=%g)`
 	batchNorm    = `BatchNormalization(axis=%d, momentum=%g, epsilon=%g)`
 	flatten      = `Flatten()`
+	rescaling    = `Rescaling(scale=%g, offset=%g)`
+	reshape      = `Reshape(target_shape=(%s))`
 )
 
 type Param struct {
@@ -31,6 +33,8 @@ type Param struct {
 	Dropout
 	BatchNormalization
 	Flatten
+	Rescaling
+	Reshape
 }
 
 func UnmarshalModule(data map[string]json.RawMessage) (Module, error) {
@@ -80,6 +84,10 @@ func (p *Param) ToCode(t string) (string, error) {
 		return p.BatchNormalization.ToCode()
 	case "Flatten":
 		return p.Flatten.ToCode()
+	case "Rescaling":
+		return p.Rescaling.ToCode()
+	case "Reshape":
+		return p.Reshape.ToCode()
 	default:
 		return "", fmt.Errorf("The type is not available")
 	}
@@ -246,4 +254,41 @@ type Flatten struct {
 
 func (f Flatten) ToCode() (string, error) {
 	return fmt.Sprintf(flatten), nil
+}
+
+// Rescaling
+type Rescaling struct {
+	Scale  *float64 `json:"scale"`
+	Offset *float64 `json:"offset"`
+}
+
+func (r *Rescaling) ToCode() (string, error) {
+	err := checkNil(r)
+	if err != nil {
+		return "", err
+	}
+
+	return fmt.Sprintf(rescaling, *r.Scale, *r.Offset), nil
+}
+
+// Reshape
+type Reshape struct {
+	TargetShape []int `json:"target_shape"`
+}
+
+func (r *Reshape) ToCode() (string, error) {
+	err := checkNil(r)
+	if err != nil {
+		return "", err
+	}
+
+	var shape string
+	for idx := 0; idx < len(r.TargetShape); idx++ {
+		shape += strconv.Itoa(r.TargetShape[idx])
+		if idx < len(r.TargetShape)-1 {
+			shape += ", "
+		}
+	}
+
+	return fmt.Sprintf(reshape, shape), nil
 }

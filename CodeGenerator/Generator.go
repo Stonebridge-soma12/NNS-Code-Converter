@@ -349,6 +349,16 @@ func BindProject(r *http.Request) (*Project, error) {
 			if err != nil {
 				return nil, err
 			}
+		case "Rescaling":
+			err = json.Unmarshal(layer["param"], &mod.Param.Rescaling)
+			if err != nil {
+				return nil, err
+			}
+		case "Reshape":
+			err = json.Unmarshal(layer["param"], &mod.Param.Reshape)
+			if err != nil {
+				return nil, err
+			}
 		default:
 			return nil, fmt.Errorf("inavlid node type")
 		}

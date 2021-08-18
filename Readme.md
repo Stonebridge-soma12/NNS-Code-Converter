@@ -33,6 +33,12 @@
     - momentum - float
     - epsilon - float
   - Flatten
+  - Rescaling
+    - scale - float
+    - offset - float : default - 0.0
+  - Reshape
+    - target_shape - integer tuple
+
 
 ### Optimizer
 - Adadelta

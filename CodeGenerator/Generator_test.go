@@ -43,12 +43,21 @@ func TestDense_ToCode(t *testing.T) {
 }
 
 func TestUnmarshalParam(t *testing.T) {
-	data := []byte(`{
+	data := []byte(`
+{
   "config": {
-    "optimizer": "adam",
-    "learning_rate": 0.001,
+    "optimizer_name": "Adam",
+    "optimizer_config": {
+      "learning_rate": 0.001,
+      "beta_1": 0.9,
+      "beta_2": 0.999,
+      "epsilon": 1e-07,
+      "amsgrad": false
+    },
     "loss": "sparse_categorical_crossentropy",
-    "metrics": ["accuracy"],
+    "metrics": [
+      "accuracy"
+    ],
     "batch_size": 32,
     "epochs": 10,
     "early_stop": {
@@ -59,7 +68,7 @@ func TestUnmarshalParam(t *testing.T) {
     "learning_rate_reduction": {
       "usage": true,
       "monitor": "val_accuracy",
-      "patience":2,
+      "patience": 2,
       "factor": 0.25,
       "min_lr": 0.0000003
     }
@@ -75,7 +84,11 @@ func TestUnmarshalParam(t *testing.T) {
         "input": null,
         "output": "node_2fbbd8e5b0a5456faa2d47f7026b139f",
         "param": {
-          "shape": [28, 28, 1]
+          "shape": [
+            28,
+            28,
+            1
+          ]
         }
       },
       {
@@ -85,10 +98,16 @@ func TestUnmarshalParam(t *testing.T) {
         "input": "node_1605430f35f94411aaf6b97eae005e19",
         "output": "node_39ce8c39bacb4fb392c2372fb81a0b7e",
         "param": {
-          "filters": 32,
-          "kernel_size": [16, 16],
+          "filters": 16,
+          "kernel_size": [
+            16,
+            16
+          ],
           "padding": "same",
-          "strides": [1, 1]
+          "strides": [
+            1,
+            1
+          ]
         }
       },
       {
@@ -142,7 +161,6 @@ func TestUnmarshalParam(t *testing.T) {
     ]
   }
 }
-
 `)
 
 	project := Project{}
