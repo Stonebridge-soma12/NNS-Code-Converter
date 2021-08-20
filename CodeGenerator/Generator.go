@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"os"
 	"regexp"
 )
 
@@ -212,22 +211,10 @@ func (c *Config) GenFit() error {
 	codes = append(codes, fitCode)
 
 	// Generate train python file
-	py, err := os.Create("train.py")
+	err = MakeTextFile(codes, "train.py")
 	if err != nil {
 		return err
 	}
-	defer py.Close()
-
-	fileSize := 0
-	for _, code := range codes {
-		n, err := py.Write([]byte(code))
-		if err != nil {
-			return err
-		}
-		fileSize += n
-	}
-
-	fmt.Printf("Generate train python file with size %d bytes.\n", fileSize)
 
 	return nil
 }
@@ -250,22 +237,7 @@ func GenerateModel(config Config, content Content) error {
 	codes = append(codes, Configs...)
 
 	// create python file
-	py, err := os.Create("model.py")
-	if err != nil {
-		return err
-	}
-	defer py.Close()
-
-	fileSize := 0
-	for _, code := range codes {
-		n, err := py.Write([]byte(code))
-		if err != nil {
-			return err
-		}
-		fileSize += n
-	}
-
-	fmt.Printf("Convert model with size %d bytes.\n", fileSize)
+	err = MakeTextFile(codes, "model.py")
 
 	return nil
 }
