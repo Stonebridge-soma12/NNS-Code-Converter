@@ -3,6 +3,7 @@ package CodeGenerator
 import (
 	"encoding/json"
 	"fmt"
+	"os"
 	"testing"
 )
 
@@ -168,4 +169,37 @@ func TestUnmarshalParam(t *testing.T) {
 		t.Error(err)
 	}
 	fmt.Print(project)
+}
+
+
+func TestServingDir(t *testing.T) {
+	dirs, err := os.ReadDir("../MNIST")
+	if err != nil {
+		t.Error(err)
+	}
+
+	for _, dir := range dirs {
+		fmt.Println(dir.Type())
+	}
+}
+
+func TestZip(t *testing.T) {
+	files, err := GetFileLists("../MNIST")
+	if err != nil {
+		t.Error(err)
+	}
+
+	err = Zip("model.zip", files)
+	if err != nil {
+		t.Error(err)
+	}
+}
+
+func TestGetFileLists(t *testing.T) {
+	files, err := GetFileLists("../MNIST")
+	if err != nil {
+		t.Error(err)
+	}
+
+	fmt.Println(files)
 }
