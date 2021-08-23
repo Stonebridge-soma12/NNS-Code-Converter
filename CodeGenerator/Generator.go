@@ -164,54 +164,54 @@ func (c *Config) GenConfig() ([]string, error) {
 	return codes, nil
 }
 
-func (c *Config) GenFit() error {
+func (c *Config) SaveModel() error {
 	var codes []string
 	codes = append(codes, importTf)
 	codes = append(codes, importTfa)
 	codes = append(codes, "import model\n\n")
 
 	// Python comment.
-	codes = append(codes, "\n# Callback functions are below if use them.\n")
-
-	es, err := c.EarlyStopping.GenCode()
-	if err != nil {
-		return err
-	}
-	codes = append(codes, es)
-
-	lrr, err := c.LearningRateReduction.GenCode()
-	if err != nil {
-		return err
-	}
-	codes = append(codes, lrr)
-
-	rm := fmt.Sprintf(
-		remoteMonitor,
-		"http://localohst:8080",
-		"/publish/epoch/end",
-	)
-
-	codes = append(codes, rm)
-	// add blank line
-	codes = append(codes, "\n")
-
-	// callbacks
-	var callbacks string
-	callbacks += "["
-	callbacks += "remote_monitor"
-	if *c.LearningRateReduction.Usage {
-		callbacks += ", learning_rate_reduction"
-	}
-	if *c.EarlyStopping.Usage {
-		callbacks += ", early_stop"
-	}
-	callbacks += "]"
-
-	fitCode := fmt.Sprintf(fitModel, "data", "label", c.Epochs, c.BatchSize, 0.3, callbacks)
-	codes = append(codes, fitCode)
+	codes = append(codes, "model.model.save('Model')")
+	//
+	//es, err := c.EarlyStopping.GenCode()
+	//if err != nil {
+	//	return err
+	//}
+	//codes = append(codes, es)
+	//
+	//lrr, err := c.LearningRateReduction.GenCode()
+	//if err != nil {
+	//	return err
+	//}
+	//codes = append(codes, lrr)
+	//
+	//rm := fmt.Sprintf(
+	//	remoteMonitor,
+	//	"http://localohst:8080",
+	//	"/publish/epoch/end",
+	//)
+	//
+	//codes = append(codes, rm)
+	//// add blank line
+	//codes = append(codes, "\n")
+	//
+	//// callbacks
+	//var callbacks string
+	//callbacks += "["
+	//callbacks += "remote_monitor"
+	//if *c.LearningRateReduction.Usage {
+	//	callbacks += ", learning_rate_reduction"
+	//}
+	//if *c.EarlyStopping.Usage {
+	//	callbacks += ", early_stop"
+	//}
+	//callbacks += "]"
+	//
+	//fitCode := fmt.Sprintf(fitModel, "data", "label", c.Epochs, c.BatchSize, 0.3, callbacks)
+	//codes = append(codes, fitCode)
 
 	// Generate train python file
-	err = MakeTextFile(codes, "train.py")
+	err := MakeTextFile(codes, "train.py")
 	if err != nil {
 		return err
 	}

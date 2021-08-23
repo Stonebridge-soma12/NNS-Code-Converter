@@ -1,7 +1,9 @@
 package main
 
 import (
+	"bytes"
 	"codeconverter/CodeGenerator"
+	"encoding/json"
 	"fmt"
 	"github.com/labstack/echo/v4"
 	"net/http"
@@ -68,7 +70,7 @@ func Fit(c echo.Context) error {
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
 
-	err = project.Config.GenFit()
+	err = project.Config.SaveModel()
 	if err != nil {
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
@@ -82,7 +84,36 @@ func Fit(c echo.Context) error {
 		fmt.Println(err)
 	}
 
-	// zip model and serving
+	// Zip saved model
+	files, err := CodeGenerator.GetFileLists("./Model")
+	if err != nil {
+		return err
+	}
+
+	err = CodeGenerator.Zip("Model.zip", files)
+	if err != nil {
+		return err
+	}
+
+	// Request to GPU server
+	byteConfig, err := json.Marshal(project.Config)
+	if err != nil {
+		return err
+	}
+	buf := bytes.NewBuffer(byteConfig)
+
+	res, err := http.Post("http://127.0.0.1:5000/run", "application/json", buf)
+	if err != nil {
+		return err
+	}
+
+	if res.StatusCode > 400 {
+		return c.NoContent(res.StatusCode)
+	}
 
 	return nil
+}
+
+func GetSavedModel(c echo.Context) error {
+	return c.File("./Model.zip")
 }

@@ -7,6 +7,14 @@
 - Rescaling, Reshape 레이어 추가
 - 모델 학습코드 파일 별도 생성하도록 수정
 
+#### v1.20 (2021-08-23)
+- Train을 Python 서버에서 실행.
+    - CodeConverter으로 학습 요청이 들어오면 파이썬코드로 만들어진 모델을 save
+    - save된 모델을 압축한 후 Python 서버로 Model config을 Body에 실어 Post요청
+    - Python server는 Codeconverter 서버에 압축된 모델을 받아온다.
+    - Python server에서 압축된 모델을 압축 해제 후 load_model
+    - body에 딸려온 Config에서 데이터셋 정보를 갖고 데이터 가공 후 학습.
+
 # Supports
 ### [Tensorflow-Keras](https://www.tensorflow.org/?hl=ko)
 ### Layer
@@ -108,7 +116,7 @@
       "epsilon": 1e-07,
       "amsgrad": false
     },
-    "loss": "sparse_categorical_crossentropy",
+    "loss": "binary_crossentropy",
     "metrics": [
       "accuracy"
     ],
@@ -125,91 +133,69 @@
       "patience": 2,
       "factor": 0.25,
       "min_lr": 0.0000003
+    },
+    "data_set": {
+      "train_uri": "https://dataset",
+      "valid_uri": "",
+      "shuffle": false,
+      "label": "blue_win"
     }
   },
   "content": {
-    "output": "node_96afcbc0a4ba4ed9b02b579068f166f0",
-    "input": "node_1605430f35f94411aaf6b97eae005e19",
+    "output": "Activation_2",
+    "input": "Input_1",
     "layers": [
       {
         "category": "Layer",
         "type": "Input",
-        "name": "node_1605430f35f94411aaf6b97eae005e19",
+        "name": "Input_1",
         "input": null,
-        "output": "node_2fbbd8e5b0a5456faa2d47f7026b139f",
+        "output": "Dense_1",
         "param": {
           "shape": [
-            28,
-            28,
-            1
-          ]
-        }
-      },
-      {
-        "category": "Layer",
-        "type": "Conv2D",
-        "name": "node_2fbbd8e5b0a5456faa2d47f7026b139f",
-        "input": "node_1605430f35f94411aaf6b97eae005e19",
-        "output": "node_39ce8c39bacb4fb392c2372fb81a0b7e",
-        "param": {
-          "filters": 16,
-          "kernel_size": [
-            16,
-            16
-          ],
-          "padding": "same",
-          "strides": [
             1,
-            1
+            58
           ]
         }
       },
       {
         "category": "Layer",
-        "type": "Dropout",
-        "name": "node_2c8a6d78d0204888942f16317f2a079f",
-        "input": "node_39ce8c39bacb4fb392c2372fb81a0b7e",
-        "output": "node_71914b8774b64700b38dc3e8e7a62caa",
+        "type": "Dense",
+        "name": "Dense_1",
+        "input": "Input_1",
+        "output": "Activation_1",
         "param": {
-          "rate": 0.5
+          "units": 256
         }
       },
       {
         "category": "Layer",
         "type": "Activation",
-        "name": "node_39ce8c39bacb4fb392c2372fb81a0b7e",
-        "input": "node_2fbbd8e5b0a5456faa2d47f7026b139f",
-        "output": "node_2c8a6d78d0204888942f16317f2a079f",
+        "name": "Activation_1",
+        "input": "Dense_1",
+        "output": "Dense_2",
         "param": {
           "activation": "relu"
         }
       },
       {
         "category": "Layer",
-        "type": "Flatten",
-        "name": "node_71914b8774b64700b38dc3e8e7a62caa",
-        "input": "node_2c8a6d78d0204888942f16317f2a079f",
-        "output": "node_020cdce94de241ac9556bb0b0022c1f2",
-        "param": {}
-      },
-      {
-        "category": "Layer",
         "type": "Dense",
-        "name": "node_020cdce94de241ac9556bb0b0022c1f2",
-        "input": "node_71914b8774b64700b38dc3e8e7a62caa",
-        "output": "node_96afcbc0a4ba4ed9b02b579068f166f0",
+        "name": "Dense_2",
+        "input": "Activation_1",
+        "output": "Activation_2",
         "param": {
-          "units": 10
+          "units": 1
         }
       },
       {
         "category": "Layer",
         "type": "Activation",
-        "name": "node_96afcbc0a4ba4ed9b02b579068f166f0",
-        "input": "node_020cdce94de241ac9556bb0b0022c1f2",
+        "name": "Activation_2",
+        "input": "Dense_2",
         "output": null,
         "param": {
-          "activation": "softmax"
+          "activation": "sigmoid"
         }
       }
     ]
@@ -224,33 +210,14 @@ import tensorflow as tf
 
 import tensorflow_addons as tfa
 
-node_1605430f35f94411aaf6b97eae005e19 = tf.keras.layers.Input(shape=(28, 28, 1))
-node_2fbbd8e5b0a5456faa2d47f7026b139f = tf.keras.layers.Conv2D(filters=16, kernel_size=(16, 16), strides=(1, 1), padding='same')(node_1605430f35f94411aaf6b97eae005e19)
-node_39ce8c39bacb4fb392c2372fb81a0b7e = tf.keras.layers.Activation(activation="relu")(node_2fbbd8e5b0a5456faa2d47f7026b139f)
-node_2c8a6d78d0204888942f16317f2a079f = tf.keras.layers.Dropout(rate=0.5)(node_39ce8c39bacb4fb392c2372fb81a0b7e)
-node_71914b8774b64700b38dc3e8e7a62caa = tf.keras.layers.Flatten()(node_2c8a6d78d0204888942f16317f2a079f)
-node_020cdce94de241ac9556bb0b0022c1f2 = tf.keras.layers.Dense(units=10)(node_71914b8774b64700b38dc3e8e7a62caa)
-node_96afcbc0a4ba4ed9b02b579068f166f0 = tf.keras.layers.Activation(activation="softmax")(node_020cdce94de241ac9556bb0b0022c1f2)
-model = tf.keras.Model(inputs=node_1605430f35f94411aaf6b97eae005e19, outputs=node_96afcbc0a4ba4ed9b02b579068f166f0)
+Input_1 = tf.keras.layers.InputLayer(shape=(1, 58))
+Dense_1 = tf.keras.layers.Dense(units=256)(Input_1)
+Activation_1 = tf.keras.layers.Activation(activation="relu")(Dense_1)
+Dense_2 = tf.keras.layers.Dense(units=1)(Activation_1)
+Activation_2 = tf.keras.layers.Activation(activation="sigmoid")(Dense_2)
+model = tf.keras.Model(inputs=Input_1, outputs=Activation_2)
 
-model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=0.001, beta_1=0.9, beta_2=0.999, epsilon=1e-07, amsgrad=False), loss="sparse_categorical_crossentropy", metrics=["accuracy"])
-```
-- /fit - train.py
-```python
-import tensorflow as tf
-
-import tensorflow_addons as tfa
-
-import model
-
-
-# Callback functions are below if use them.
-early_stop = tf.keras.callbacks.EarlyStopping(monitor='loss', patience=2)
-learning_rate_reduction = tf.keras.callbacks.ReduceLROnPlateau(monitor='val_accuracy', patience=2, verbose=1, factor=0.25, min_lr=3e-07)
-remote_monitor = tf.keras.callbacks.RemoteMonitor(root='http://localohst:8080', path='/publish/epoch/end', field='data', headers=None, send_as_json=True)
-
-model.model.fit(data, label, epochs=10, batch_size=32, validation_split=0.3, callbacks=[remote_monitor, learning_rate_reduction, early_stop])
-
+model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=0.001, beta_1=0.9, beta_2=0.999, epsilon=1e-07, amsgrad=False), loss="binary_crossentropy", metrics=["accuracy"])
 ```
 
 > Requestbody로 넘어오는 레이어의 순서와 실제 순서가 다를 수 있기 때문에 서버에서 한 번 정렬해 준 후 코드로 변환된다.

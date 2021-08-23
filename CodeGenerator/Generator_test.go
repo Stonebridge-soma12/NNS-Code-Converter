@@ -184,12 +184,12 @@ func TestServingDir(t *testing.T) {
 }
 
 func TestZip(t *testing.T) {
-	files, err := GetFileLists("../MNIST")
+	files, err := GetFileLists("../Model")
 	if err != nil {
 		t.Error(err)
 	}
 
-	err = Zip("model.zip", files)
+	err = Zip("Model.zip", files)
 	if err != nil {
 		t.Error(err)
 	}

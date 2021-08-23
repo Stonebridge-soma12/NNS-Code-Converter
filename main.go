@@ -17,6 +17,7 @@ func main() {
 	e.GET("/", func(c echo.Context) error {
 		return c.String(http.StatusOK, "Hello, World!")
 	})
+	e.GET("/model", GetSavedModel)
 
 	e.POST("/make-python", MakeModel)
 	e.POST("/publish/epoch/end", TrainMonitor)

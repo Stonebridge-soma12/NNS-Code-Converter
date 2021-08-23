@@ -15,7 +15,7 @@ const (
 	avgPooling2d = `AveragePooling2D(pool_size=(%d, %d), strides=(%d, %d), padding='%s')`
 	maxPool2d    = `MaxPool2D(pool_size=(%d, %d), strides=(%d, %d), padding='%s')`
 	activation   = `Activation(activation="%s")`
-	input        = `Input(shape=(%s))`
+	input        = `InputLayer(shape=(%s))`
 	dropout      = `Dropout(rate=%g)`
 	batchNorm    = `BatchNormalization(axis=%d, momentum=%g, epsilon=%g)`
 	flatten      = `Flatten()`
@@ -197,7 +197,7 @@ func (a *Activation) ToCode() (string, error) {
 
 // Input
 type Input struct {
-	Shape []int `json:"shape"`
+	Shape     []int `json:"shape"`
 }
 
 func (i *Input) ToCode() (string, error) {
