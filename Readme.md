@@ -14,6 +14,7 @@
     - Python server는 Codeconverter 서버에 압축된 모델을 받아온다.
     - Python server에서 압축된 모델을 압축 해제 후 load_model
     - body에 딸려온 Config에서 데이터셋 정보를 갖고 데이터 가공 후 학습.
+- 데이터셋 정보를 Config에 탑재 (임시)
 
 # Supports
 ### [Tensorflow-Keras](https://www.tensorflow.org/?hl=ko)
