@@ -11,22 +11,3 @@ type Normalization struct {
 	Usage  *bool   `json:"usage"`
 	Method *string `json:"method"`
 }
-
-//// Get file list of saved model directory
-//func GetModel(dir string) error {
-//	var fileList []string
-//
-//	dirs, err := os.ReadDir(dir)
-//	if err != nil {
-//		return err
-//	}
-//
-//	for _, dir := range dirs {
-//		if dir.Type() == fs.ModeDir {
-//
-//		}
-//		fmt.Println(dir.Type())
-//	}
-//
-//	return nil
-//}

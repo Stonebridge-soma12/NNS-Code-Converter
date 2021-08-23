@@ -12,12 +12,13 @@ import (
 )
 
 func MakeModel(c echo.Context) error {
-	project, err := CodeGenerator.BindProject(c.Request())
+	var project CodeGenerator.Project
+	err := project.BindProject(c.Request())
 	if err != nil {
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
 
-	err = CodeGenerator.GenerateModel(project.Config, project.Content)
+	err = project.GenerateModel()
 	if err != nil {
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
@@ -60,17 +61,19 @@ func TrainMonitor(c echo.Context) error {
 
 
 func Fit(c echo.Context) error {
-	project, err := CodeGenerator.BindProject(c.Request())
+	var project CodeGenerator.Project
+
+	err := project.BindProject(c.Request())
 	if err != nil {
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
 
-	err = CodeGenerator.GenerateModel(project.Config, project.Content)
+	err = project.GenerateModel()
 	if err != nil {
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
 
-	err = project.Config.SaveModel()
+	err = project.SaveModel()
 	if err != nil {
 		return c.String(http.StatusInternalServerError, err.Error())
 	}

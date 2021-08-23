@@ -3,7 +3,6 @@ package CodeGenerator
 import (
 	"encoding/json"
 	"fmt"
-	"strings"
 )
 
 const (
@@ -32,55 +31,9 @@ func (c *Config) UnmarshalConfig(data map[string]json.RawMessage) error {
 		return err
 	}
 
-	//Unmarshal optimizer config
-	switch strings.Title(c.OptimizerName) {
-	case "Adadelta":
-		err := json.Unmarshal(data["optimizer_config"], &c.OptimizerConfig.Adadelta)
-		if err != nil {
-			return err
-		}
-	case "Adadgrad":
-		err := json.Unmarshal(data["optimizer_config"], &c.OptimizerConfig.Adagrad)
-		if err != nil {
-			return err
-		}
-	case "Adam":
-		err := json.Unmarshal(data["optimizer_config"], &c.OptimizerConfig.Adam)
-		if err != nil {
-			return err
-		}
-	case "Adamax":
-		err := json.Unmarshal(data["optimizer_config"], &c.OptimizerConfig.Adamax)
-		if err != nil {
-			return err
-		}
-	case "Nadam":
-		err := json.Unmarshal(data["optimizer_config"], &c.OptimizerConfig.Nadam)
-		if err != nil {
-			return err
-		}
-	case "RMSprop":
-		err := json.Unmarshal(data["optimizer_config"], &c.OptimizerConfig.RMSprop)
-		if err != nil {
-			return err
-		}
-	case "SGD":
-		err := json.Unmarshal(data["optimizer_config"], &c.OptimizerConfig.SGD)
-		if err != nil {
-			return err
-		}
-	case "AdamW":
-		err := json.Unmarshal(data["optimizer_config"], &c.OptimizerConfig.AdamW)
-		if err != nil {
-			return err
-		}
-	case "SGDW":
-		err := json.Unmarshal(data["optimizer_config"], &c.OptimizerConfig.SGDW)
-		if err != nil {
-			return err
-		}
-	default:
-		return fmt.Errorf("invalid optimizer")
+	err = c.OptimizerConfig.BindOptimizer(c.OptimizerName, data["optimizer_config"])
+	if err != nil {
+		return err
 	}
 
 	err = json.Unmarshal(data["loss"], &c.Loss)
@@ -112,8 +65,33 @@ func (c *Config) UnmarshalConfig(data map[string]json.RawMessage) error {
 		return err
 	}
 
-
 	return nil
+}
+
+// generate compile codes from config.json
+func (c *Config) GenConfig() ([]string, error) {
+	var codes []string
+
+	// get optimizer
+	optimizer, err := c.OptimizerConfig.ToCode(c.OptimizerName)
+	if err != nil {
+		return nil, err
+	}
+
+	// get metrics
+	var metrics string
+	for i := 1; i <= len(c.Metrics); i++ {
+		metrics += fmt.Sprintf("\"%s\"", c.Metrics[i-1])
+		if i < len(c.Metrics) {
+			metrics += ", "
+		}
+	}
+
+	// get compile
+	compile := fmt.Sprintf("model.compile(optimizer=%s, loss=\"%s\", metrics=[%s])\n", optimizer, c.Loss, metrics)
+	codes = append(codes, compile)
+
+	return codes, nil
 }
 
 // EarlyStop struct.
