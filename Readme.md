@@ -11,7 +11,7 @@
 - Train을 Python 서버에서 실행.
     - CodeConverter으로 학습 요청이 들어오면 파이썬코드로 만들어진 모델을 save
     - save된 모델을 압축한 후 Python 서버로 Model config을 Body에 실어 Post요청
-    - Python server는 Codeconverter 서버에 압축된 모델을 받아온다.
+    - [Python server](https://github.com/Stonebridge-soma12/GPUServer) 는 Codeconverter 서버에 압축된 모델을 받아온다.
     - Python server에서 압축된 모델을 압축 해제 후 load_model
     - body에 딸려온 Config에서 데이터셋 정보를 갖고 데이터 가공 후 학습.
 - 데이터셋 정보를 Config에 탑재 (임시)
