@@ -16,6 +16,9 @@
     - body에 딸려온 Config에서 데이터셋 정보를 갖고 데이터 가공 후 학습.
 - 데이터셋 정보를 Config에 탑재 (임시)
 
+#### v1.21 (2021-08-25)
+- Math 모듈 추가
+
 # Supports
 ### [Tensorflow-Keras](https://www.tensorflow.org/?hl=ko)
 ### Layer
@@ -99,6 +102,13 @@
     - learning_rate - float
     - momentum - float
     - nesterov - boolean : default - false
+
+### Math
+- Abs
+- Ceil
+- Floor
+- Round
+- Sqrt
 
 
 ## 실행 예시

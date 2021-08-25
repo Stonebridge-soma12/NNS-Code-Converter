@@ -29,70 +29,77 @@ func (c *Content) BindContent(data map[string]json.RawMessage) error {
 
 	for _, layer := range layers {
 		// Unmarshalling module informations except parameters.
-		mod, err := UnmarshalModule(layer)
+
+		l, err := UnmarshalLayer(layer)
 		if err != nil {
 			return err
 		}
-		switch mod.Type {
+
+		//if l.Category == "Math" {
+		//	err = l.Param.Math.Unmarshall(l.Type, layer["param"])
+		//	continue
+		//}
+
+		switch l.Type {
 		case "Input":
-			err = json.Unmarshal(layer["param"], &mod.Param.Input)
+			err = json.Unmarshal(layer["param"], &l.Param.Input)
 			if err != nil {
 				return err
 			}
 		case "Conv2D":
-			err = json.Unmarshal(layer["param"], &mod.Param.Conv2D)
+			err = json.Unmarshal(layer["param"], &l.Param.Conv2D)
 			if err != nil {
 				return err
 			}
 		case "Dense":
-			err = json.Unmarshal(layer["param"], &mod.Param.Dense)
+			err = json.Unmarshal(layer["param"], &l.Param.Dense)
 			if err != nil {
 				return err
 			}
 		case "AveragePooling2D":
-			err = json.Unmarshal(layer["param"], &mod.Param.AveragePooling2D)
+			err = json.Unmarshal(layer["param"], &l.Param.AveragePooling2D)
 			if err != nil {
 				return err
 			}
 		case "MaxPool2D":
-			err = json.Unmarshal(layer["param"], &mod.Param.MaxPool2D)
+			err = json.Unmarshal(layer["param"], &l.Param.MaxPool2D)
 			if err != nil {
 				return err
 			}
 		case "Activation":
-			err = json.Unmarshal(layer["param"], &mod.Param.Activation)
+			err = json.Unmarshal(layer["param"], &l.Param.Activation)
 			if err != nil {
 				return err
 			}
 		case "Dropout":
-			err = json.Unmarshal(layer["param"], &mod.Param.Dropout)
+			err = json.Unmarshal(layer["param"], &l.Param.Dropout)
 			if err != nil {
 				return err
 			}
 		case "BatchNormalization":
-			err = json.Unmarshal(layer["param"], &mod.Param.BatchNormalization)
+			err = json.Unmarshal(layer["param"], &l.Param.BatchNormalization)
 			if err != nil {
 				return err
 			}
 		case "Flatten":
-			err = json.Unmarshal(layer["param"], &mod.Param.Flatten)
+			err = json.Unmarshal(layer["param"], &l.Param.Flatten)
 			if err != nil {
 				return err
 			}
 		case "Rescaling":
-			err = json.Unmarshal(layer["param"], &mod.Param.Rescaling)
+			err = json.Unmarshal(layer["param"], &l.Param.Rescaling)
 			if err != nil {
 				return err
 			}
 		case "Reshape":
-			err = json.Unmarshal(layer["param"], &mod.Param.Reshape)
+			err = json.Unmarshal(layer["param"], &l.Param.Reshape)
 			if err != nil {
 				return err
 			}
 		default:
 			return fmt.Errorf("inavlid node type")
 		}
-		c.Layers = append(c.Layers, mod)
+		c.Layers = append(c.Layers, l)
 	}
 
 	return nil
@@ -106,7 +113,7 @@ func (c *Content) GenLayers() ([]string, error) {
 
 	// code converting
 	for _, d := range layers {
-		layer, err := d.ToCode()
+		layer, err := d.GetCode()
 		if err != nil {
 			return nil, err
 		}

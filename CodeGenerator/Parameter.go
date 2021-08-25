@@ -15,7 +15,7 @@ const (
 	avgPooling2d = `AveragePooling2D(pool_size=(%d, %d), strides=(%d, %d), padding='%s')`
 	maxPool2d    = `MaxPool2D(pool_size=(%d, %d), strides=(%d, %d), padding='%s')`
 	activation   = `Activation(activation="%s")`
-	input        = `InputLayer(shape=(%s))`
+	input        = `Input(shape=(%s))`
 	dropout      = `Dropout(rate=%g)`
 	batchNorm    = `BatchNormalization(axis=%d, momentum=%g, epsilon=%g)`
 	flatten      = `Flatten()`
@@ -24,6 +24,8 @@ const (
 )
 
 type Param struct {
+	Math
+
 	Conv2D
 	Dense
 	AveragePooling2D
@@ -37,7 +39,7 @@ type Param struct {
 	Reshape
 }
 
-func UnmarshalModule(data map[string]json.RawMessage) (Layer, error) {
+func UnmarshalLayer(data map[string]json.RawMessage) (Layer, error) {
 	var res Layer
 	err := json.Unmarshal(data["category"], &res.Category)
 	if err != nil {
@@ -63,31 +65,31 @@ func UnmarshalModule(data map[string]json.RawMessage) (Layer, error) {
 	return res, nil
 }
 
-// ToCode converting module to code.
-func (p *Param) ToCode(t string) (string, error) {
+// GetCode converting module to code.
+func (p *Param) GetCode(t string) (string, error) {
 	switch t {
 	case "Input":
-		return p.Input.ToCode()
+		return p.Input.GetCode()
 	case "Dense":
-		return p.Dense.ToCode()
+		return p.Dense.GetCode()
 	case "Conv2D":
-		return p.Conv2D.ToCode()
+		return p.Conv2D.GetCode()
 	case "AveragePooling2D":
-		return p.AveragePooling2D.ToCode()
+		return p.AveragePooling2D.GetCode()
 	case "MaxPool2D":
-		return p.MaxPool2D.ToCode()
+		return p.MaxPool2D.GetCode()
 	case "Activation":
-		return p.Activation.ToCode()
+		return p.Activation.GetCode()
 	case "Dropout":
-		return p.Dropout.ToCode()
+		return p.Dropout.GetCode()
 	case "BatchNormalization":
-		return p.BatchNormalization.ToCode()
+		return p.BatchNormalization.GetCode()
 	case "Flatten":
-		return p.Flatten.ToCode()
+		return p.Flatten.GetCode()
 	case "Rescaling":
-		return p.Rescaling.ToCode()
+		return p.Rescaling.GetCode()
 	case "Reshape":
-		return p.Reshape.ToCode()
+		return p.Reshape.GetCode()
 	default:
 		return "", fmt.Errorf("The type is not available")
 	}
@@ -126,7 +128,7 @@ type Conv2D struct {
 	Strides    []int   `json:"strides"`
 }
 
-func (c *Conv2D) ToCode() (string, error) {
+func (c *Conv2D) GetCode() (string, error) {
 	err := checkNil(c)
 	if err != nil {
 		return "", err
@@ -140,7 +142,7 @@ type Dense struct {
 	Units *int `json:"units"`
 }
 
-func (d *Dense) ToCode() (string, error) {
+func (d *Dense) GetCode() (string, error) {
 	err := checkNil(d)
 	if err != nil {
 		return "", err
@@ -156,7 +158,7 @@ type AveragePooling2D struct {
 	Padding  *string `json:"padding"`
 }
 
-func (a *AveragePooling2D) ToCode() (string, error) {
+func (a *AveragePooling2D) GetCode() (string, error) {
 	err := checkNil(a)
 	if err != nil {
 		return "", err
@@ -172,7 +174,7 @@ type MaxPool2D struct {
 	Padding  *string `json:"padding"`
 }
 
-func (m *MaxPool2D) ToCode() (string, error) {
+func (m *MaxPool2D) GetCode() (string, error) {
 	err := checkNil(m)
 	if err != nil {
 		return "", err
@@ -186,7 +188,7 @@ type Activation struct {
 	Activation *string `json:"activation"`
 }
 
-func (a *Activation) ToCode() (string, error) {
+func (a *Activation) GetCode() (string, error) {
 	err := checkNil(a)
 	if err != nil {
 		return "", err
@@ -200,7 +202,7 @@ type Input struct {
 	Shape     []int `json:"shape"`
 }
 
-func (i *Input) ToCode() (string, error) {
+func (i *Input) GetCode() (string, error) {
 	err := checkNil(i)
 	if err != nil {
 		return "", err
@@ -222,7 +224,7 @@ type Dropout struct {
 	Rate *float64 `json:"rate"`
 }
 
-func (d *Dropout) ToCode() (string, error) {
+func (d *Dropout) GetCode() (string, error) {
 	err := checkNil(d)
 	if err != nil {
 		return "", err
@@ -238,7 +240,7 @@ type BatchNormalization struct {
 	Epsilon  *float64 `json:"epsilon"`
 }
 
-func (b *BatchNormalization) ToCode() (string, error) {
+func (b *BatchNormalization) GetCode() (string, error) {
 	err := checkNil(b)
 	if err != nil {
 		return "", err
@@ -252,7 +254,7 @@ type Flatten struct {
 	// Flatten has no parameter
 }
 
-func (f Flatten) ToCode() (string, error) {
+func (f Flatten) GetCode() (string, error) {
 	return fmt.Sprintf(flatten), nil
 }
 
@@ -262,7 +264,7 @@ type Rescaling struct {
 	Offset *float64 `json:"offset"`
 }
 
-func (r *Rescaling) ToCode() (string, error) {
+func (r *Rescaling) GetCode() (string, error) {
 	err := checkNil(r)
 	if err != nil {
 		return "", err
@@ -276,7 +278,7 @@ type Reshape struct {
 	TargetShape []int `json:"target_shape"`
 }
 
-func (r *Reshape) ToCode() (string, error) {
+func (r *Reshape) GetCode() (string, error) {
 	err := checkNil(r)
 	if err != nil {
 		return "", err

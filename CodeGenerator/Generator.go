@@ -11,13 +11,14 @@ type Project struct {
 }
 
 const (
-	importTf      = "import tensorflow as tf\n\n"
-	importTfa     = "import tensorflow_addons as tfa\n\n"
-	tf            = "tf"
-	tfa           = "tfa"
-	keras         = ".keras"
-	layers        = ".layers"
-	createModel   = "model = tf.keras.Model(inputs=%s, outputs=%s)\n\n"
+	importTf    = "import tensorflow as tf\n\n"
+	importTfa   = "import tensorflow_addons as tfa\n\n"
+	tf          = "tf"
+	tfa         = "tfa"
+	keras       = ".keras"
+	layers      = ".layers"
+	math        = ".math"
+	createModel = "model = tf.keras.Model(inputs=%s, outputs=%s)\n\n"
 )
 
 func (p *Project) SaveModel() error {
@@ -61,9 +62,7 @@ func (p *Project) GenerateModel() error {
 	return nil
 }
 
-
 func (p *Project) BindProject(r *http.Request) error {
-	project := new(Project)
 	data := make(map[string]json.RawMessage)
 	cc := make(map[string]json.RawMessage)
 
@@ -81,7 +80,7 @@ func (p *Project) BindProject(r *http.Request) error {
 		return err
 	}
 
-	err = project.Config.UnmarshalConfig(config)
+	err = p.Config.UnmarshalConfig(config)
 	if err != nil {
 		return err
 	}
@@ -92,7 +91,7 @@ func (p *Project) BindProject(r *http.Request) error {
 		return err
 	}
 
-	err = project.Content.BindContent(cc)
+	err = p.Content.BindContent(cc)
 	if err != nil {
 		return err
 	}

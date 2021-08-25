@@ -19,7 +19,7 @@ func TestConv2D_ToCode(t *testing.T) {
 		&padding,
 		strides,
 	}
-	res, err := conv2D.ToCode()
+	res, err := conv2D.GetCode()
 	if err != nil {
 		fmt.Println(res)
 		t.Error(err)
@@ -34,7 +34,7 @@ func TestDense_ToCode(t *testing.T) {
 		Units: &units,
 	}
 
-	res, err := dense.ToCode()
+	res, err := dense.GetCode()
 	if err != nil {
 		fmt.Println(res)
 		t.Error(err)
