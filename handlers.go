@@ -88,12 +88,13 @@ func Fit(c echo.Context) error {
 	}
 
 	// Zip saved model
-	files, err := CodeGenerator.GetFileLists("./Model")
+	targetBase := fmt.Sprintf("./%s/", project.UserId)
+	files, err := CodeGenerator.GetFileLists(targetBase + "Model")
 	if err != nil {
 		return err
 	}
 
-	err = CodeGenerator.Zip("Model.zip", files)
+	err = CodeGenerator.Zip(targetBase + "Model.zip", files)
 	if err != nil {
 		return err
 	}
@@ -105,7 +106,13 @@ func Fit(c echo.Context) error {
 	}
 	buf := bytes.NewBuffer(byteConfig)
 
-	res, err := http.Post("http://127.0.0.1:5000/run", "application/json", buf)
+	req, err := http.NewRequest("POST", "http://127.0.0.1:5000/run", buf)
+	if err != nil {
+		return err
+	}
+	req.Header.Add("id", project.UserId)
+	client := &http.Client{}
+	res, err := client.Do(req)
 	if err != nil {
 		return err
 	}
@@ -118,5 +125,7 @@ func Fit(c echo.Context) error {
 }
 
 func GetSavedModel(c echo.Context) error {
-	return c.File("./Model.zip")
+	userId := c.Request().Header.Get("id")
+	target := fmt.Sprintf("./%s/", userId)
+	return c.File(target + "Model.zip")
 }

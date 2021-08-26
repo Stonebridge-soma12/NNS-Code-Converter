@@ -2,10 +2,12 @@ package CodeGenerator
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 )
 
 type Project struct {
+	UserId  string  `header:"id"`
 	Config  Config  `json:"config"`
 	Content Content `json:"content"`
 }
@@ -28,7 +30,8 @@ func (p *Project) SaveModel() error {
 	codes = append(codes, "import model\n\n")
 
 	// Python comment.
-	codes = append(codes, "model.model.save('Model')")
+	saveCode := fmt.Sprintf("model.model.save('./%s/Model')", p.UserId)
+	codes = append(codes, saveCode)
 
 	// Generate train python file
 	err := MakeTextFile(codes, "train.py")
@@ -68,10 +71,11 @@ func (p *Project) BindProject(r *http.Request) error {
 
 	// Binding request body
 	err := json.NewDecoder(r.Body).Decode(&data)
-
 	if err != nil {
 		return err
 	}
+
+	p.UserId = r.Header.Get("id")
 
 	// Unmarshalling Config.
 	var config map[string]json.RawMessage
