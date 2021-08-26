@@ -23,5 +23,5 @@ func main() {
 	e.POST("/publish/epoch/end", TrainMonitor)
 	e.POST("/fit", Fit)
 
-	e.Logger.Fatal(e.Start(":8080"))
+	e.Logger.Fatal(e.Start(":8081"))
 }
