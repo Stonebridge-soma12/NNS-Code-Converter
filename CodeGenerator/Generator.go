@@ -30,7 +30,8 @@ func (p *Project) SaveModel() error {
 	codes = append(codes, "import model\n\n")
 
 	// Python comment.
-	saveCode := fmt.Sprintf("model.model.save('./%s/Model')", p.UserId)
+	saveCode := fmt.Sprintf("import os\n os.getcwd()\n")
+	saveCode = fmt.Sprintf("model.model.save('./%s/Model')", p.UserId)
 	codes = append(codes, saveCode)
 
 	// Generate train python file
