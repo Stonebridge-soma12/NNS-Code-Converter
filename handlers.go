@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"codeconverter/CodeGenerator"
+	"codeconverter/Config"
 	"encoding/json"
 	"fmt"
 	"github.com/labstack/echo/v4"
@@ -106,7 +107,14 @@ func Fit(c echo.Context) error {
 	}
 	buf := bytes.NewBuffer(byteConfig)
 
-	req, err := http.NewRequest("POST", "http://127.0.0.1:5000/run", buf)
+	cfg, err := Config.GetConfig()
+	if err != nil {
+		return err
+	}
+	var URL string
+	URL = cfg.BaseURL + cfg.Port
+
+	req, err := http.NewRequest("POST", URL + "/run", buf)
 	if err != nil {
 		return err
 	}
