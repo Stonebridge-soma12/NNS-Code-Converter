@@ -55,6 +55,9 @@ func Zip(filename string, files []string) error {
 		return err
 	}
 	defer newZipFile.Close()
+
+	err = os.Chmod(filename, 755)
+
 	zipWriter := zip.NewWriter(newZipFile)
 	defer zipWriter.Close()
 	// Add files to zip
