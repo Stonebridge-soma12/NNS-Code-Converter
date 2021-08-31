@@ -16,13 +16,13 @@ func GetConfig() (Config, error) {
 	var cf Config
 
 	// base
-	baseCfg, err := ioutil.ReadFile("/Config/config.base")
+	baseCfg, err := ioutil.ReadFile("./Config/config.base")
 	if err != nil {
 		return cf, err
 	}
 	base := strings.NewReader(string(baseCfg))
 
-	cfg, err := ioutil.ReadFile("/Config/config.dev")
+	cfg, err := ioutil.ReadFile("./Config/config.dev")
 	if err != nil {
 		return cf, err
 	}

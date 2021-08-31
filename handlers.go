@@ -112,7 +112,7 @@ func Fit(c echo.Context) error {
 		return err
 	}
 	var URL string
-	URL = cfg.BaseURL + cfg.Port
+	URL = fmt.Sprintf("%s:%s", cfg.BaseURL, cfg.Port)
 
 	req, err := http.NewRequest("POST", URL + "/run", buf)
 	if err != nil {
