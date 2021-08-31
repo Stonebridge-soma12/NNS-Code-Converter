@@ -79,7 +79,7 @@ func Fit(c echo.Context) error {
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
 
-	cmd := exec.Command("python", "./train.py")
+	cmd := exec.Command("python", "train.py")
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 
