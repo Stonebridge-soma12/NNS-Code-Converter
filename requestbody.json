@@ -25,13 +25,13 @@
       "patience": 2,
       "factor": 0.25,
       "min_lr": 0.0000003
-    },
-    "data_set": {
-      "train_uri": "https://dataset",
-      "valid_uri": "",
-      "shuffle": false,
-      "label": "blue_win"
     }
+  },
+  "data_set": {
+    "train_uri": "https://dataset",
+    "valid_uri": "",
+    "shuffle": false,
+    "label": "blue_win"
   },
   "content": {
     "output": "Activation_2",

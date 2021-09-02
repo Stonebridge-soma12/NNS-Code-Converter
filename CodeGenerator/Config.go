@@ -60,10 +60,6 @@ func (c *Config) UnmarshalConfig(data map[string]json.RawMessage) error {
 	if err != nil {
 		return err
 	}
-	err = json.Unmarshal(data["data_set"], &c.DataSet)
-	if err != nil {
-		return err
-	}
 
 	return nil
 }
