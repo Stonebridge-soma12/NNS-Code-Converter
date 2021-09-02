@@ -11,3 +11,5 @@ MNIST/
 elixter/
 
 *.zip
+
+*/config.dev.yaml
