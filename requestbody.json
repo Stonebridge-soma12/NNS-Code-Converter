@@ -27,11 +27,15 @@
       "min_lr": 0.0000003
     }
   },
-  "data_set": {
-    "train_uri": "https://dataset",
+  "dataset": {
+    "train_uri": "https://s3.ap-northeast-2.amazonaws.com/image.nns/test.csv",
     "valid_uri": "",
     "shuffle": false,
-    "label": "blue_win"
+    "label": "blue_win",
+    "normalization": {
+      "usage": true,
+      "method": "MinMax"
+    }
   },
   "content": {
     "output": "Activation_2",
