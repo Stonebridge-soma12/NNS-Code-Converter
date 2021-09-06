@@ -24,6 +24,10 @@
     - 각 Trainer (Worker) 마다 하나의 학습 요청만 처리하도록 설정
     - flask 프레임워크가 필요없어졌기 때문에 삭제
 
+#### v1.31 (2021-08-05)
+- 한 노드에 여러 입출력 처리 추가
+    - 레이어 변수명 먼저 모두 선언 후 Input 레이어부터 BFS로 순회하며 각 레이어 연걸.
+
 # Supports
 ### [Tensorflow-Keras](https://www.tensorflow.org/?hl=ko)
 ### Layer
