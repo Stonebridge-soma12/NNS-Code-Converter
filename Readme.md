@@ -19,6 +19,11 @@
 #### v1.21 (2021-08-25)
 - Math 모듈 추가
 
+#### v1.30 (2021-09-02)
+- Python server 사이에 Message queue 추가
+    - 각 Trainer (Worker) 마다 하나의 학습 요청만 처리하도록 설정
+    - flask 프레임워크가 필요없어졌기 때문에 삭제
+
 # Supports
 ### [Tensorflow-Keras](https://www.tensorflow.org/?hl=ko)
 ### Layer
@@ -144,12 +149,16 @@
       "patience": 2,
       "factor": 0.25,
       "min_lr": 0.0000003
-    },
-    "data_set": {
-      "train_uri": "https://dataset",
-      "valid_uri": "",
-      "shuffle": false,
-      "label": "blue_win"
+    }
+  },
+  "dataset": {
+    "train_uri": "https://dataset",
+    "valid_uri": "",
+    "shuffle": false,
+    "label": "blue_win",
+    "normalization": {
+      "usage": true,
+      "method": "MinMax"
     }
   },
   "content": {

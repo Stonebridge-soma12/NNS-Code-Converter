@@ -1,15 +1,16 @@
 package main
 
 import (
-	"bytes"
 	"codeconverter/CodeGenerator"
 	"codeconverter/Config"
+	"codeconverter/MessageQ"
 	"encoding/json"
 	"fmt"
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/gommon/random"
+	"github.com/streadway/amqp"
 	"net/http"
 	"os"
-	"os/exec"
 )
 
 func MakeModel(c echo.Context) error {
@@ -69,25 +70,6 @@ func Fit(c echo.Context) error {
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
 
-	err = project.GenerateModel()
-	if err != nil {
-		return c.String(http.StatusInternalServerError, err.Error())
-	}
-
-	err = project.SaveModel()
-	if err != nil {
-		return c.String(http.StatusInternalServerError, err.Error())
-	}
-
-	cmd := exec.Command("python", "train.py")
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-
-	err = cmd.Run()
-	if err != nil {
-		fmt.Println(err)
-	}
-
 	// Zip saved model
 	targetBase := fmt.Sprintf("./%s/", project.UserId)
 	files, err := CodeGenerator.GetFileLists(targetBase + "Model")
@@ -101,32 +83,46 @@ func Fit(c echo.Context) error {
 	}
 
 	// Request to GPU server
-	byteConfig, err := json.Marshal(project.Config)
+	body := project.GetTrainBody()
+	jsonBody, err := json.Marshal(body)
 	if err != nil {
 		return err
 	}
-	buf := bytes.NewBuffer(byteConfig)
 
 	cfg, err := Config.GetConfig()
 	if err != nil {
 		return err
 	}
-	var URL string
-	URL = fmt.Sprintf("%s:%s", cfg.BaseURL, cfg.Port)
 
-	req, err := http.NewRequest("POST", URL + "/run", buf)
+	conn, err := MessageQ.CreateConnection(cfg.Account, cfg.Pw, cfg.Host)
 	if err != nil {
 		return err
 	}
-	req.Header.Add("id", project.UserId)
-	client := &http.Client{}
-	res, err := client.Do(req)
+	defer conn.Close()
+
+	ch, err := conn.Channel()
+	if err != nil {
+		return err
+	}
+	defer ch.Close()
+
+	// define mq
+	q, err := ch.QueueDeclare("Reply", false, false, false, false, nil)
 	if err != nil {
 		return err
 	}
 
-	if res.StatusCode > 400 {
-		return c.NoContent(res.StatusCode)
+	// TODO: requestId (CorrelationId)를 uuid 사용하도록 수정해야함.
+	requestId := random.String(32)
+	publish := amqp.Publishing{
+		ContentType: "application/json",
+		CorrelationId: requestId,
+		Body:jsonBody,
+		ReplyTo: q.Name,
+	}
+	err = ch.Publish("", "Request", false, false, publish)
+	if err != nil {
+		return err
 	}
 
 	return nil

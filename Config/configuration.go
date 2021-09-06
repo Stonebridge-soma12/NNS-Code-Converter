@@ -8,8 +8,9 @@ import (
 )
 
 type Config struct {
-	BaseURL string	`yaml:"base_url"`
-	Port    string	`yaml:"port"`
+	Host    string `yaml:"host"`
+	Account string `yaml:"account"`
+	Pw      string `yaml:"password"`
 }
 
 func GetConfig() (Config, error) {
@@ -28,17 +29,17 @@ func GetConfig() (Config, error) {
 	}
 	conf := strings.NewReader(string(cfg))
 
-	fmt.Println(conf)
-
 	yaml, err := config.NewYAML(config.Source(base), config.Source(conf))
 	if err != nil {
 		return cf, err
 	}
 
-	err = yaml.Get("URL").Populate(&cf)
+	err = yaml.Get("Config").Populate(&cf)
 	if err != nil {
 		return cf, err
 	}
+
+	fmt.Println(cf)
 
 	return cf, nil
 }

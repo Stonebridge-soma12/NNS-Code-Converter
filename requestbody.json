@@ -25,12 +25,16 @@
       "patience": 2,
       "factor": 0.25,
       "min_lr": 0.0000003
-    },
-    "data_set": {
-      "train_uri": "https://dataset",
-      "valid_uri": "",
-      "shuffle": false,
-      "label": "blue_win"
+    }
+  },
+  "dataset": {
+    "train_uri": "https://s3.ap-northeast-2.amazonaws.com/image.nns/test.csv",
+    "valid_uri": "",
+    "shuffle": false,
+    "label": "blue_win",
+    "normalization": {
+      "usage": true,
+      "method": "MinMax"
     }
   },
   "content": {
