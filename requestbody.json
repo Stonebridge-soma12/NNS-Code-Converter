@@ -42,7 +42,9 @@
         "type": "Input",
         "name": "Input_1",
         "input": null,
-        "output": "Dense_1",
+        "output": [
+          "Dense_1"
+        ],
         "param": {
           "shape": [
             1,
@@ -54,8 +56,12 @@
         "category": "Layer",
         "type": "Dense",
         "name": "Dense_1",
-        "input": "Input_1",
-        "output": "Activation_1",
+        "input": [
+          "Input_1"
+        ],
+        "output": [
+          "Activation_1"
+        ],
         "param": {
           "units": 256
         }
@@ -64,8 +70,12 @@
         "category": "Layer",
         "type": "Activation",
         "name": "Activation_1",
-        "input": "Dense_1",
-        "output": "Dense_2",
+        "input": [
+          "Dense_1"
+        ],
+        "output": [
+          "Dense_2"
+        ],
         "param": {
           "activation": "relu"
         }
@@ -74,8 +84,12 @@
         "category": "Layer",
         "type": "Dense",
         "name": "Dense_2",
-        "input": "Activation_1",
-        "output": "Activation_2",
+        "input": [
+          "Activation_1"
+        ],
+        "output": [
+          "Activation_2"
+        ],
         "param": {
           "units": 1
         }
@@ -84,7 +98,9 @@
         "category": "Layer",
         "type": "Activation",
         "name": "Activation_2",
-        "input": "Dense_2",
+        "input": [
+          "Dense_2"
+        ],
         "output": null,
         "param": {
           "activation": "sigmoid"

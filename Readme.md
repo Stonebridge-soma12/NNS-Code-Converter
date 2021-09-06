@@ -161,7 +161,9 @@
         "type": "Input",
         "name": "Input_1",
         "input": null,
-        "output": "Dense_1",
+        "output": [
+          "Dense_1"
+        ],
         "param": {
           "shape": [
             1,
@@ -173,8 +175,12 @@
         "category": "Layer",
         "type": "Dense",
         "name": "Dense_1",
-        "input": "Input_1",
-        "output": "Activation_1",
+        "input": [
+          "Input_1"
+        ],
+        "output": [
+          "Activation_1"
+        ],
         "param": {
           "units": 256
         }
@@ -183,8 +189,12 @@
         "category": "Layer",
         "type": "Activation",
         "name": "Activation_1",
-        "input": "Dense_1",
-        "output": "Dense_2",
+        "input": [
+          "Dense_1"
+        ],
+        "output": [
+          "Dense_2"
+        ],
         "param": {
           "activation": "relu"
         }
@@ -193,8 +203,12 @@
         "category": "Layer",
         "type": "Dense",
         "name": "Dense_2",
-        "input": "Activation_1",
-        "output": "Activation_2",
+        "input": [
+          "Activation_1"
+        ],
+        "output": [
+          "Activation_2"
+        ],
         "param": {
           "units": 1
         }
@@ -203,7 +217,9 @@
         "category": "Layer",
         "type": "Activation",
         "name": "Activation_2",
-        "input": "Dense_2",
+        "input": [
+          "Dense_2"
+        ],
         "output": null,
         "param": {
           "activation": "sigmoid"
@@ -221,11 +237,15 @@ import tensorflow as tf
 
 import tensorflow_addons as tfa
 
-Input_1 = tf.keras.layers.InputLayer(shape=(1, 58))
-Dense_1 = tf.keras.layers.Dense(units=256)(Input_1)
-Activation_1 = tf.keras.layers.Activation(activation="relu")(Dense_1)
-Dense_2 = tf.keras.layers.Dense(units=1)(Activation_1)
-Activation_2 = tf.keras.layers.Activation(activation="sigmoid")(Dense_2)
+Input_1 = tf.keras.layers.Input(shape=(1, 58))
+Dense_1 = tf.keras.layers.Dense(units=256)
+Activation_1 = tf.keras.layers.Activation(activation="relu")
+Dense_2 = tf.keras.layers.Dense(units=1)
+Activation_2 = tf.keras.layers.Activation(activation="sigmoid")
+Dense_1 = Dense_1(Input_1)
+Activation_1 = Activation_1(Dense_1)
+Dense_2 = Dense_2(Activation_1)
+Activation_2 = Activation_2(Dense_2)
 model = tf.keras.Model(inputs=Input_1, outputs=Activation_2)
 
 model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=0.001, beta_1=0.9, beta_2=0.999, epsilon=1e-07, amsgrad=False), loss="binary_crossentropy", metrics=["accuracy"])

@@ -108,17 +108,29 @@ func (c *Content) BindContent(data map[string]json.RawMessage) error {
 // Generate layer codes from content.json
 func (c *Content) GenLayers() ([]string, error) {
 	var codes []string
+	// TODO: BFS돌리며 레이어 변수 선언 및 연결
+	layerIdxMap := c.GetLayerNameToIdxMap()
 
-	layers := SortLayers(c.Layers)
-
-	// code converting
-	for _, d := range layers {
-		layer, err := d.GetCode()
+	// Generate layer variables
+	for _, l := range c.Layers {
+		layer, err := l.GetVariables()
 		if err != nil {
 			return nil, err
 		}
-
 		codes = append(codes, layer)
+	}
+
+	// Connect layers through BFS.
+	var q Queue
+	q.Push(layerIdxMap["Input_1"])
+	for !q.Empty() {
+		current := q.Pop()
+		layerConn := c.Layers[current.(int)].ConnectLayer()
+		codes = append(codes, layerConn)
+
+		for _, next := range c.Layers[current.(int)].Output {
+			q.Push(layerIdxMap[next])
+		}
 	}
 
 	// create model.
@@ -128,52 +140,62 @@ func (c *Content) GenLayers() ([]string, error) {
 	return codes, nil
 }
 
-func SortLayers(source []Layer) []Layer {
-	// Sorting layer components via BFS.
-	type node struct {
-		idx    int
-		Output *string
-	}
+func (c *Content) GetLayerNameToIdxMap() map[string]int {
+	result := make(map[string]int)
 
-	var result []Layer             // result Content slice.
-	adj := make(map[string][]node) // adjustment matrix of each nodes.
-	var inputIdx int
-
-	// setup adjustment matrix.
-	for idx, layer := range source {
-		// Input layer is always first.u
-		var input string
-		if layer.Type == "Input" {
-			inputIdx = idx
-
-			// result = append(result, layer)
-		}
-		input = layer.Name
-
-		var nodeSlice []node
-		if adj[input] == nil {
-			nodeSlice = append(nodeSlice, node{idx, layer.Output})
-			adj[input] = nodeSlice
-		} else {
-			prev, _ := adj[input]
-			nodeSlice = prev
-			nodeSlice = append(nodeSlice, node{idx, layer.Output})
-			adj[input] = nodeSlice
-		}
-	}
-
-	// Using BFS with queue
-	var q Queue
-	q.Push(source[inputIdx].Name)
-	for !q.Empty() {
-		current := q.Pop()
-		for _, next := range adj[current] {
-			if next.Output != nil {
-				q.Push(*next.Output)
-			}
-			result = append(result, source[next.idx])
-		}
+	for i, l := range c.Layers {
+		result[l.Name] = i
 	}
 
 	return result
 }
+//
+//func SortLayers(source []Layer) []Layer {
+//	// Sorting layer components via BFS.
+//	type node struct {
+//		idx    int
+//		Output *string
+//	}
+//
+//	var result []Layer             // result Content slice.
+//	adj := make(map[string][]node) // adjustment matrix of each nodes.
+//	var inputIdx int
+//
+//	// setup adjustment matrix.
+//	for idx, layer := range source {
+//		// Input layer is always first.u
+//		var input string
+//		if layer.Type == "Input" {
+//			inputIdx = idx
+//
+//			// result = append(result, layer)
+//		}
+//		input = layer.Name
+//
+//		var nodeSlice []node
+//		if adj[input] == nil {
+//			nodeSlice = append(nodeSlice, node{idx, layer.Output})
+//			adj[input] = nodeSlice
+//		} else {
+//			prev, _ := adj[input]
+//			nodeSlice = prev
+//			nodeSlice = append(nodeSlice, node{idx, layer.Output})
+//			adj[input] = nodeSlice
+//		}
+//	}
+//
+//	// Using BFS with queue
+//	var q Queue
+//	q.Push(source[inputIdx].Name)
+//	for !q.Empty() {
+//		current := q.Pop()
+//		for _, next := range adj[current] {
+//			if next.Output != nil {
+//				q.Push(*next.Output)
+//			}
+//			result = append(result, source[next.idx])
+//		}
+//	}
+//
+//	return result
+//}
