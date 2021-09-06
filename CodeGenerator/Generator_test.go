@@ -3,6 +3,7 @@ package CodeGenerator
 import (
 	"encoding/json"
 	"fmt"
+	"os"
 	"testing"
 )
 
@@ -18,7 +19,7 @@ func TestConv2D_ToCode(t *testing.T) {
 		&padding,
 		strides,
 	}
-	res, err := conv2D.ToCode()
+	res, err := conv2D.GetCode()
 	if err != nil {
 		fmt.Println(res)
 		t.Error(err)
@@ -33,7 +34,7 @@ func TestDense_ToCode(t *testing.T) {
 		Units: &units,
 	}
 
-	res, err := dense.ToCode()
+	res, err := dense.GetCode()
 	if err != nil {
 		fmt.Println(res)
 		t.Error(err)
@@ -168,4 +169,37 @@ func TestUnmarshalParam(t *testing.T) {
 		t.Error(err)
 	}
 	fmt.Print(project)
+}
+
+
+func TestServingDir(t *testing.T) {
+	dirs, err := os.ReadDir("../MNIST")
+	if err != nil {
+		t.Error(err)
+	}
+
+	for _, dir := range dirs {
+		fmt.Println(dir.Type())
+	}
+}
+
+func TestZip(t *testing.T) {
+	files, err := GetFileLists("../Model")
+	if err != nil {
+		t.Error(err)
+	}
+
+	err = Zip("Model.zip", files)
+	if err != nil {
+		t.Error(err)
+	}
+}
+
+func TestGetFileLists(t *testing.T) {
+	files, err := GetFileLists("../MNIST")
+	if err != nil {
+		t.Error(err)
+	}
+
+	fmt.Println(files)
 }

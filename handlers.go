@@ -1,7 +1,10 @@
 package main
 
 import (
+	"bytes"
 	"codeconverter/CodeGenerator"
+	"codeconverter/Config"
+	"encoding/json"
 	"fmt"
 	"github.com/labstack/echo/v4"
 	"net/http"
@@ -10,12 +13,13 @@ import (
 )
 
 func MakeModel(c echo.Context) error {
-	project, err := CodeGenerator.BindProject(c.Request())
+	var project CodeGenerator.Project
+	err := project.BindProject(c.Request())
 	if err != nil {
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
 
-	err = CodeGenerator.GenerateModel(project.Config, project.Content)
+	err = project.GenerateModel()
 	if err != nil {
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
@@ -58,22 +62,24 @@ func TrainMonitor(c echo.Context) error {
 
 
 func Fit(c echo.Context) error {
-	project, err := CodeGenerator.BindProject(c.Request())
+	var project CodeGenerator.Project
+
+	err := project.BindProject(c.Request())
 	if err != nil {
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
 
-	err = CodeGenerator.GenerateModel(project.Config, project.Content)
+	err = project.GenerateModel()
 	if err != nil {
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
 
-	err = project.Config.GenFit()
+	err = project.SaveModel()
 	if err != nil {
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
 
-	cmd := exec.Command("python", "./train.py")
+	cmd := exec.Command("python", "train.py")
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 
@@ -82,7 +88,52 @@ func Fit(c echo.Context) error {
 		fmt.Println(err)
 	}
 
-	// zip model and serving
+	// Zip saved model
+	targetBase := fmt.Sprintf("./%s/", project.UserId)
+	files, err := CodeGenerator.GetFileLists(targetBase + "Model")
+	if err != nil {
+		return err
+	}
+
+	err = CodeGenerator.Zip(targetBase + "Model.zip", files)
+	if err != nil {
+		return err
+	}
+
+	// Request to GPU server
+	byteConfig, err := json.Marshal(project.Config)
+	if err != nil {
+		return err
+	}
+	buf := bytes.NewBuffer(byteConfig)
+
+	cfg, err := Config.GetConfig()
+	if err != nil {
+		return err
+	}
+	var URL string
+	URL = fmt.Sprintf("%s:%s", cfg.BaseURL, cfg.Port)
+
+	req, err := http.NewRequest("POST", URL + "/run", buf)
+	if err != nil {
+		return err
+	}
+	req.Header.Add("id", project.UserId)
+	client := &http.Client{}
+	res, err := client.Do(req)
+	if err != nil {
+		return err
+	}
+
+	if res.StatusCode > 400 {
+		return c.NoContent(res.StatusCode)
+	}
 
 	return nil
+}
+
+func GetSavedModel(c echo.Context) error {
+	userId := c.Request().Header.Get("id")
+	target := fmt.Sprintf("./%s/", userId)
+	return c.File(target + "Model.zip")
 }

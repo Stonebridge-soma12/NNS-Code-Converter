@@ -1,6 +1,7 @@
 package CodeGenerator
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
 )
@@ -32,6 +33,61 @@ type Optimizer struct {
 	SGD
 	AdamW
 	SGDW
+}
+
+func (o *Optimizer) BindOptimizer(name string,data json.RawMessage) error {
+	//Unmarshal optimizer config
+	switch strings.Title(name) {
+	case "Adadelta":
+		err := json.Unmarshal(data, &o.Adadelta)
+		if err != nil {
+			return err
+		}
+	case "Adadgrad":
+		err := json.Unmarshal(data, &o.Adagrad)
+		if err != nil {
+			return err
+		}
+	case "Adam":
+		err := json.Unmarshal(data, &o.Adam)
+		if err != nil {
+			return err
+		}
+	case "Adamax":
+		err := json.Unmarshal(data, &o.Adamax)
+		if err != nil {
+			return err
+		}
+	case "Nadam":
+		err := json.Unmarshal(data, &o.Nadam)
+		if err != nil {
+			return err
+		}
+	case "RMSprop":
+		err := json.Unmarshal(data, &o.RMSprop)
+		if err != nil {
+			return err
+		}
+	case "SGD":
+		err := json.Unmarshal(data, &o.SGD)
+		if err != nil {
+			return err
+		}
+	case "AdamW":
+		err := json.Unmarshal(data, &o.AdamW)
+		if err != nil {
+			return err
+		}
+	case "SGDW":
+		err := json.Unmarshal(data, &o.SGDW)
+		if err != nil {
+			return err
+		}
+	default:
+		return fmt.Errorf("invalid optimizer")
+	}
+
+	return nil
 }
 
 func (o *Optimizer) ToCode(name string) (string, error) {

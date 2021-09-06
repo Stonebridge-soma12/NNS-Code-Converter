@@ -1,11 +1,10 @@
 package main
 
 import (
+	"github.com/labstack/echo/v4"
 	// "encoding/json"
 	// "io/ioutil"
 	"github.com/labstack/echo/v4/middleware"
-
-	"github.com/labstack/echo/v4"
 	"net/http"
 )
 
@@ -18,13 +17,11 @@ func main() {
 	e.GET("/", func(c echo.Context) error {
 		return c.String(http.StatusOK, "Hello, World!")
 	})
-	//e.GET("/getmodel", func(c echo.Context) error {
-	//	return c.File("./model.py")
-	//})
+	e.GET("/model", GetSavedModel)
 
 	e.POST("/make-python", MakeModel)
 	e.POST("/publish/epoch/end", TrainMonitor)
 	e.POST("/fit", Fit)
 
-	e.Logger.Fatal(e.Start(":8080"))
+	e.Logger.Fatal(e.Start(":8081"))
 }
