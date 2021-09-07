@@ -155,7 +155,7 @@
       "min_lr": 0.0000003
     }
   },
-  "dataset": {
+  "data_set": {
     "train_uri": "https://dataset",
     "valid_uri": "",
     "shuffle": false,

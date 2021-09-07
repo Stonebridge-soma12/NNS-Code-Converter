@@ -20,7 +20,6 @@ type Config struct {
 	Output                string      `json:"output"`
 	EarlyStopping         EarlyStop   `json:"early_stop"`
 	LearningRateReduction LrReduction `json:"learning_rate_reduction"`
-	DataSet               DataSet     `json:"data_set"`
 }
 
 // UnmarshalConfig

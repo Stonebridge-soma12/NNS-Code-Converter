@@ -106,19 +106,13 @@ func Fit(c echo.Context) error {
 	}
 	defer ch.Close()
 
-	// define mq
-	q, err := ch.QueueDeclare("Reply", false, false, false, false, nil)
-	if err != nil {
-		return err
-	}
-
 	// TODO: requestId (CorrelationId)를 uuid 사용하도록 수정해야함.
 	requestId := random.String(32)
 	publish := amqp.Publishing{
+		DeliveryMode: amqp.Persistent,
 		ContentType: "application/json",
 		CorrelationId: requestId,
 		Body:jsonBody,
-		ReplyTo: q.Name,
 	}
 	err = ch.Publish("", "Request", false, false, publish)
 	if err != nil {

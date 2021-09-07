@@ -11,13 +11,13 @@ import (
 type Project struct {
 	UserId  string  `header:"id"`
 	Config  Config  `json:"config"`
-	DataSet DataSet `json:"dataset"`
+	DataSet DataSet `json:"data_set"`
 	Content Content `json:"content"`
 }
 
 type Train struct {
 	Config  Config  `json:"config"`
-	DataSet DataSet `json:"dataset"`
+	DataSet DataSet `json:"data_set"`
 	UserId  string  `json:"id"`
 }
 
@@ -56,7 +56,10 @@ func (p *Project) BindProject(r *http.Request) error {
 		return err
 	}
 
-	p.DataSet.Bind(data["dataset"])
+	err = p.DataSet.Bind(data["data_set"])
+	if err != nil {
+		return err
+	}
 
 	// Unmarshalling Content.
 	err = json.Unmarshal(data["content"], &cc)

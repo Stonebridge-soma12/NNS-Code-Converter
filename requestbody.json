@@ -27,7 +27,7 @@
       "min_lr": 0.0000003
     }
   },
-  "dataset": {
+  "data_set": {
     "train_uri": "https://s3.ap-northeast-2.amazonaws.com/image.nns/test.csv",
     "valid_uri": "",
     "shuffle": false,
