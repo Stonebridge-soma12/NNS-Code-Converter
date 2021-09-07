@@ -7,8 +7,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/labstack/echo/v4"
-	"github.com/labstack/gommon/random"
-	"github.com/streadway/amqp"
 	"net/http"
 	"os"
 )
@@ -100,21 +98,7 @@ func Fit(c echo.Context) error {
 	}
 	defer conn.Close()
 
-	ch, err := conn.Channel()
-	if err != nil {
-		return err
-	}
-	defer ch.Close()
-
-	// TODO: requestId (CorrelationId)를 uuid 사용하도록 수정해야함.
-	requestId := random.String(32)
-	publish := amqp.Publishing{
-		DeliveryMode: amqp.Persistent,
-		ContentType: "application/json",
-		CorrelationId: requestId,
-		Body:jsonBody,
-	}
-	err = ch.Publish("", "Request", false, false, publish)
+	err = conn.Publish(jsonBody)
 	if err != nil {
 		return err
 	}
