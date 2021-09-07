@@ -92,7 +92,7 @@ func Fit(c echo.Context) error {
 		return err
 	}
 
-	conn, err := MessageQ.CreateConnection(cfg.Account, cfg.Pw, cfg.Host)
+	conn, err := MessageQ.CreateConnection(cfg.Account, cfg.Pw, cfg.Host, cfg.VHost)
 	if err != nil {
 		return err
 	}

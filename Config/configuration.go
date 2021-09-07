@@ -11,6 +11,7 @@ type Config struct {
 	Host    string `yaml:"host"`
 	Account string `yaml:"account"`
 	Pw      string `yaml:"password"`
+	VHost   string `yaml:"vhost"`
 }
 
 func GetConfig() (Config, error) {
