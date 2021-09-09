@@ -13,8 +13,8 @@ type ResponseMsg struct {
 }
 
 type MessageQ struct {
-	Connection *amqp.Connection
-	Channel    *amqp.Channel
+	connection *amqp.Connection
+	channel    *amqp.Channel
 }
 
 const (
@@ -39,7 +39,7 @@ func CreateConnection(id, pw, host, vhost string) (*MessageQ, error) {
 		return nil, err
 	}
 
-	res := &MessageQ{Connection: conn, Channel: ch}
+	res := &MessageQ{connection: conn, channel: ch}
 
 	return res, nil
 }
@@ -53,7 +53,7 @@ func (m *MessageQ) Publish(data []byte) error {
 		Body:          data,
 	}
 
-	err := m.Channel.Publish("", "Request", false, false, publish)
+	err := m.channel.Publish("", "Request", false, false, publish)
 	if err != nil {
 		return err
 	}
@@ -62,12 +62,12 @@ func (m *MessageQ) Publish(data []byte) error {
 }
 
 func (m *MessageQ) Close() error {
-	err := m.Channel.Close()
+	err := m.channel.Close()
 	if err != nil {
 		return err
 	}
 
-	err = m.Connection.Close()
+	err = m.connection.Close()
 	if err != nil {
 		return err
 	}

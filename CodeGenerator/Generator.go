@@ -94,7 +94,7 @@ func (p *Project) SaveModel() error {
 	if err != nil {
 		return nil
 	}
-	fmt.Println("Finished saving model %s", p.UserId)
+	fmt.Printf("Finished saving model %s", p.UserId)
 
 	return nil
 }
