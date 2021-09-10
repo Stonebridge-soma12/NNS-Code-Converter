@@ -1,0 +1,6 @@
+Config : {
+    host: "",
+    vhost: "/",
+    account: "",
+    password: "",
+}

@@ -20,7 +20,6 @@ type Config struct {
 	Output                string      `json:"output"`
 	EarlyStopping         EarlyStop   `json:"early_stop"`
 	LearningRateReduction LrReduction `json:"learning_rate_reduction"`
-	DataSet               DataSet     `json:"data_set"`
 }
 
 // UnmarshalConfig
@@ -57,10 +56,6 @@ func (c *Config) UnmarshalConfig(data map[string]json.RawMessage) error {
 		return err
 	}
 	err = json.Unmarshal(data["learning_rate_reduction"], &c.LearningRateReduction)
-	if err != nil {
-		return err
-	}
-	err = json.Unmarshal(data["data_set"], &c.DataSet)
 	if err != nil {
 		return err
 	}

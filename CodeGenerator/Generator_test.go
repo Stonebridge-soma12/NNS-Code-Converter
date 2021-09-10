@@ -55,7 +55,7 @@ func TestUnmarshalParam(t *testing.T) {
       "epsilon": 1e-07,
       "amsgrad": false
     },
-    "loss": "sparse_categorical_crossentropy",
+    "loss": "binary_crossentropy",
     "metrics": [
       "accuracy"
     ],
@@ -74,89 +74,87 @@ func TestUnmarshalParam(t *testing.T) {
       "min_lr": 0.0000003
     }
   },
+  "data_set": {
+    "train_uri": "https://s3.ap-northeast-2.amazonaws.com/image.nns/test.csv",
+    "valid_uri": "",
+    "shuffle": false,
+    "label": "blue_win",
+    "normalization": {
+      "usage": true,
+      "method": "MinMax"
+    }
+  },
   "content": {
-    "output": "node_96afcbc0a4ba4ed9b02b579068f166f0",
-    "input": "node_1605430f35f94411aaf6b97eae005e19",
+    "output": "Activation_2",
+    "input": "Input_1",
     "layers": [
       {
         "category": "Layer",
         "type": "Input",
-        "name": "node_1605430f35f94411aaf6b97eae005e19",
+        "name": "Input_1",
         "input": null,
-        "output": "node_2fbbd8e5b0a5456faa2d47f7026b139f",
+        "output": [
+          "Dense_1"
+        ],
         "param": {
           "shape": [
-            28,
-            28,
-            1
-          ]
-        }
-      },
-      {
-        "category": "Layer",
-        "type": "Conv2D",
-        "name": "node_2fbbd8e5b0a5456faa2d47f7026b139f",
-        "input": "node_1605430f35f94411aaf6b97eae005e19",
-        "output": "node_39ce8c39bacb4fb392c2372fb81a0b7e",
-        "param": {
-          "filters": 16,
-          "kernel_size": [
-            16,
-            16
-          ],
-          "padding": "same",
-          "strides": [
             1,
-            1
+            58
           ]
         }
       },
       {
         "category": "Layer",
-        "type": "Dropout",
-        "name": "node_2c8a6d78d0204888942f16317f2a079f",
-        "input": "node_39ce8c39bacb4fb392c2372fb81a0b7e",
-        "output": "node_71914b8774b64700b38dc3e8e7a62caa",
+        "type": "Dense",
+        "name": "Dense_1",
+        "input": [
+          "Input_1"
+        ],
+        "output": [
+          "Activation_1"
+        ],
         "param": {
-          "rate": 0.5
+          "units": 256
         }
       },
       {
         "category": "Layer",
         "type": "Activation",
-        "name": "node_39ce8c39bacb4fb392c2372fb81a0b7e",
-        "input": "node_2fbbd8e5b0a5456faa2d47f7026b139f",
-        "output": "node_2c8a6d78d0204888942f16317f2a079f",
+        "name": "Activation_1",
+        "input": [
+          "Dense_1"
+        ],
+        "output": [
+          "Dense_2"
+        ],
         "param": {
           "activation": "relu"
         }
       },
       {
         "category": "Layer",
-        "type": "Flatten",
-        "name": "node_71914b8774b64700b38dc3e8e7a62caa",
-        "input": "node_2c8a6d78d0204888942f16317f2a079f",
-        "output": "node_020cdce94de241ac9556bb0b0022c1f2",
-        "param": {}
-      },
-      {
-        "category": "Layer",
         "type": "Dense",
-        "name": "node_020cdce94de241ac9556bb0b0022c1f2",
-        "input": "node_71914b8774b64700b38dc3e8e7a62caa",
-        "output": "node_96afcbc0a4ba4ed9b02b579068f166f0",
+        "name": "Dense_2",
+        "input": [
+          "Activation_1"
+        ],
+        "output": [
+          "Activation_2"
+        ],
         "param": {
-          "units": 10
+          "units": 1
         }
       },
       {
         "category": "Layer",
         "type": "Activation",
-        "name": "node_96afcbc0a4ba4ed9b02b579068f166f0",
-        "input": "node_020cdce94de241ac9556bb0b0022c1f2",
+        "name": "Activation_2",
+        "input": [
+          "Dense_2"
+        ],
         "output": null,
         "param": {
-          "activation": "softmax"
+          "activation": "sigmoid"
         }
       }
     ]

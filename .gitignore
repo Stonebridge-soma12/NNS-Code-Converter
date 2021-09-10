@@ -11,3 +11,7 @@ MNIST/
 elixter/
 
 *.zip
+
+Config/config.dev.yaml
+
+*.sql

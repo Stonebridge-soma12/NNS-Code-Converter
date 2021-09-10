@@ -25,12 +25,16 @@
       "patience": 2,
       "factor": 0.25,
       "min_lr": 0.0000003
-    },
-    "data_set": {
-      "train_uri": "https://dataset",
-      "valid_uri": "",
-      "shuffle": false,
-      "label": "blue_win"
+    }
+  },
+  "data_set": {
+    "train_uri": "https://s3.ap-northeast-2.amazonaws.com/image.nns/test.csv",
+    "valid_uri": "",
+    "shuffle": false,
+    "label": "blue_win",
+    "normalization": {
+      "usage": true,
+      "method": "MinMax"
     }
   },
   "content": {
@@ -42,7 +46,9 @@
         "type": "Input",
         "name": "Input_1",
         "input": null,
-        "output": "Dense_1",
+        "output": [
+          "Dense_1"
+        ],
         "param": {
           "shape": [
             1,
@@ -54,8 +60,12 @@
         "category": "Layer",
         "type": "Dense",
         "name": "Dense_1",
-        "input": "Input_1",
-        "output": "Activation_1",
+        "input": [
+          "Input_1"
+        ],
+        "output": [
+          "Activation_1"
+        ],
         "param": {
           "units": 256
         }
@@ -64,8 +74,12 @@
         "category": "Layer",
         "type": "Activation",
         "name": "Activation_1",
-        "input": "Dense_1",
-        "output": "Dense_2",
+        "input": [
+          "Dense_1"
+        ],
+        "output": [
+          "Dense_2"
+        ],
         "param": {
           "activation": "relu"
         }
@@ -74,8 +88,12 @@
         "category": "Layer",
         "type": "Dense",
         "name": "Dense_2",
-        "input": "Activation_1",
-        "output": "Activation_2",
+        "input": [
+          "Activation_1"
+        ],
+        "output": [
+          "Activation_2"
+        ],
         "param": {
           "units": 1
         }
@@ -84,7 +102,9 @@
         "category": "Layer",
         "type": "Activation",
         "name": "Activation_2",
-        "input": "Dense_2",
+        "input": [
+          "Dense_2"
+        ],
         "output": null,
         "param": {
           "activation": "sigmoid"
