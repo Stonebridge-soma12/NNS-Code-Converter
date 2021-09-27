@@ -9,6 +9,7 @@ import (
 )
 
 type Project struct {
+	TrainId int64   `json:"train_id"`
 	UserId  string  `header:"id"`
 	Config  Config  `json:"config"`
 	DataSet DataSet `json:"data_set"`
@@ -16,9 +17,10 @@ type Project struct {
 }
 
 type Train struct {
+	TrainId int64   `json:"train_id"`
+	UserId  string  `json:"id"`
 	Config  Config  `json:"config"`
 	DataSet DataSet `json:"data_set"`
-	UserId  string  `json:"id"`
 }
 
 const (
@@ -63,6 +65,11 @@ func (p *Project) BindProject(r *http.Request) error {
 
 	// Unmarshalling Content.
 	err = json.Unmarshal(data["content"], &cc)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(data["train_id"], &p.TrainId)
 	if err != nil {
 		return err
 	}
@@ -142,5 +149,12 @@ func (p *Project) GenerateSaveModel() error {
 }
 
 func (p *Project) GetTrainBody() Train {
-	return Train{DataSet: p.DataSet, UserId: p.UserId, Config: p.Config}
+	trainInfo := Train{
+		TrainId: p.TrainId,
+		UserId:  p.UserId,
+		DataSet: p.DataSet,
+		Config:  p.Config,
+	}
+
+	return trainInfo
 }

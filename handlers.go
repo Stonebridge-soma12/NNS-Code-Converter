@@ -15,12 +15,12 @@ func MakeModel(c echo.Context) error {
 	var project CodeGenerator.Project
 	err := project.BindProject(c.Request())
 	if err != nil {
-		return c.String(http.StatusInternalServerError, err.Error())
+		return c.String(http.StatusBadRequest, err.Error())
 	}
 
 	err = project.GenerateModel()
 	if err != nil {
-		return c.String(http.StatusInternalServerError, err.Error())
+		return c.String(http.StatusBadRequest, err.Error())
 	}
 
 	// Attach result python file
@@ -42,42 +42,43 @@ func Fit(c echo.Context) error {
 
 	err := project.BindProject(c.Request())
 	if err != nil {
-		return c.String(http.StatusInternalServerError, err.Error())
+		return c.String(http.StatusBadRequest, err.Error())
 	}
 
 	// Zip saved model
 	targetBase := fmt.Sprintf("./%s/", project.UserId)
 	files, err := CodeGenerator.GetFileLists(targetBase + "Model")
 	if err != nil {
-		return err
+		return c.String(http.StatusInternalServerError, err.Error())
 	}
 
 	err = CodeGenerator.Zip(targetBase + "Model.zip", files)
 	if err != nil {
-		return err
+		return c.String(http.StatusInternalServerError, err.Error())
 	}
 
 	// Request to GPU server
-	body := project.GetTrainBody()
+	body:= project.GetTrainBody()
+
 	jsonBody, err := json.Marshal(body)
 	if err != nil {
-		return err
+		return c.String(http.StatusInternalServerError, err.Error())
 	}
 
 	cfg, err := Config.GetConfig()
 	if err != nil {
-		return err
+		return c.String(http.StatusInternalServerError, err.Error())
 	}
 
 	conn, err := MessageQ.CreateConnection(cfg.Account, cfg.Pw, cfg.Host, cfg.VHost)
 	if err != nil {
-		return err
+		return c.String(http.StatusInternalServerError, err.Error())
 	}
 	defer conn.Close()
 
 	err = conn.Publish(jsonBody)
 	if err != nil {
-		return err
+		return c.String(http.StatusInternalServerError, err.Error())
 	}
 
 	return nil
