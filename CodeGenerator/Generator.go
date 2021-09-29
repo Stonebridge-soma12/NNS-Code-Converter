@@ -10,7 +10,7 @@ import (
 
 type Project struct {
 	TrainId int64   `json:"train_id"`
-	UserId  string  `header:"id"`
+	UserId  string  `header:"user_id"`
 	Config  Config  `json:"config"`
 	DataSet DataSet `json:"data_set"`
 	Content Content `json:"content"`
@@ -18,7 +18,7 @@ type Project struct {
 
 type Train struct {
 	TrainId int64   `json:"train_id"`
-	UserId  string  `json:"id"`
+	UserId  string  `json:"user_id"`
 	Config  Config  `json:"config"`
 	DataSet DataSet `json:"data_set"`
 }
