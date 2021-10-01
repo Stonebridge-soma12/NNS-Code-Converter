@@ -6,11 +6,12 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+	"strconv"
 )
 
 type Project struct {
 	TrainId int64   `json:"train_id"`
-	UserId  string  `header:"user_id"`
+	UserId  int64   `header:"user_id"`
 	Config  Config  `json:"config"`
 	DataSet DataSet `json:"data_set"`
 	Content Content `json:"content"`
@@ -18,7 +19,7 @@ type Project struct {
 
 type Train struct {
 	TrainId int64   `json:"train_id"`
-	UserId  string  `json:"user_id"`
+	UserId  int64   `json:"user_id"`
 	Config  Config  `json:"config"`
 	DataSet DataSet `json:"data_set"`
 }
@@ -44,7 +45,7 @@ func (p *Project) BindProject(r *http.Request) error {
 		return err
 	}
 
-	p.UserId = r.Header.Get("id")
+	p.UserId, _ = strconv.ParseInt(r.Header.Get("id"), 10, 64)
 
 	// Unmarshalling Config.
 	var config map[string]json.RawMessage
