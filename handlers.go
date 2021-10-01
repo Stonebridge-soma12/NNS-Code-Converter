@@ -9,6 +9,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"net/http"
 	"os"
+	"strconv"
 )
 
 func MakeModel(c echo.Context) error {
@@ -45,8 +46,13 @@ func Fit(c echo.Context) error {
 		return c.String(http.StatusBadRequest, err.Error())
 	}
 
+	err = project.SaveModel()
+	if err != nil {
+		return c.NoContent(http.StatusInternalServerError)
+	}
+
 	// Zip saved model
-	targetBase := fmt.Sprintf("./%s/", project.UserId)
+	targetBase := fmt.Sprintf("./%d/", project.UserId)
 	files, err := CodeGenerator.GetFileLists(targetBase + "Model")
 	if err != nil {
 		return c.String(http.StatusInternalServerError, err.Error())
@@ -85,7 +91,7 @@ func Fit(c echo.Context) error {
 }
 
 func GetSavedModel(c echo.Context) error {
-	userId := c.Request().Header.Get("id")
-	target := fmt.Sprintf("./%s/", userId)
+	userId, _ := strconv.ParseInt(c.Request().Header.Get("id"), 10, 64)
+	target := fmt.Sprintf("./%d/", userId)
 	return c.File(target + "Model.zip")
 }

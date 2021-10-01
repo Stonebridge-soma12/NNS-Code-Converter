@@ -89,7 +89,7 @@ func (p *Project) SaveModel() error {
 		return err
 	}
 
-	err = p.SaveModel()
+	err = p.GenerateSaveModel()
 	if err != nil {
 		return err
 	}
@@ -137,7 +137,7 @@ func (p *Project) GenerateSaveModel() error {
 	codes = append(codes, "import model\n\n")
 
 	// Python comment.
-	saveCode := fmt.Sprintf("model.model.save('./%s/Model')", p.UserId)
+	saveCode := fmt.Sprintf("model.model.save('./%d/Model')", p.UserId)
 	codes = append(codes, saveCode)
 
 	// Generate train python file
