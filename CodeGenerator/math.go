@@ -134,44 +134,14 @@ type Add struct {
 }
 
 func (a *Add) GetCode(inputs []string) (string, error) {
-	n := len(inputs)
-	if n < 2 {
-		return "", fmt.Errorf(ErrInsufficientNumOfInput)
-	}
-
-	var params string
-
-	for i, input := range inputs {
-		params += input
-		if i < n-1 {
-			params += ", "
-		}
-	}
-	params = fmt.Sprintf(add, params)
-
-	return params, nil
+	return overTwoInputs(inputs, add)
 }
 
 type Sub struct {
 }
 
 func (s *Sub) GetCode(inputs []string) (string, error) {
-	n := len(inputs)
-	if n < 2 {
-		return "", fmt.Errorf(ErrInsufficientNumOfInput)
-	}
-
-	var params string
-
-	for i, input := range inputs {
-		params += input
-		if i < n-1 {
-			params += ", "
-		}
-	}
-	params = fmt.Sprintf(subtract, params)
-
-	return params, nil
+	return overTwoInputs(inputs, subtract)
 }
 
 type Log struct {
@@ -179,4 +149,23 @@ type Log struct {
 
 func (l *Log) GetCode() (string, error) {
 	return log, nil
+}
+
+func overTwoInputs(inputs []string, codeBase string) (string, error) {
+	n := len(inputs)
+	if n < 2 {
+		return "", fmt.Errorf(ErrInsufficientNumOfInput)
+	}
+
+	var params string
+
+	for i, input := range inputs {
+		params += input
+		if i < n-1 {
+			params += ", "
+		}
+	}
+	params = fmt.Sprintf(codeBase, params)
+
+	return params, nil
 }
