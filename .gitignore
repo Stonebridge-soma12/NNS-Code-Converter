@@ -13,6 +13,6 @@ elixter/
 
 *.zip
 
-Config/config.dev.yaml
+config/config.dev.yaml
 
 *.sql

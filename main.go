@@ -17,10 +17,10 @@ func main() {
 	e.GET("/", func(c echo.Context) error {
 		return c.String(http.StatusOK, "Hello, World!")
 	})
-	e.GET("/api/model", GetSavedModel)
+	e.GET("/api/model", GetSavedModelHandler)
 
-	e.POST("/api/python", MakeModel)
-	e.POST("/api/fit", Fit)
+	e.POST("/api/python", MakeModelHandler)
+	e.POST("/api/fit", FitHandler)
 
 	e.Logger.Fatal(e.Start(":8081"))
 }
