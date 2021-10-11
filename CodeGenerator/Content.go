@@ -5,6 +5,10 @@ import (
 	"fmt"
 )
 
+const (
+	ErrUnsupportedCategoryType = "unsupported category type"
+)
+
 type Content struct {
 	Output string  `json:"output"`
 	Input  string  `json:"input"`
@@ -35,69 +39,13 @@ func (c *Content) BindContent(data map[string]json.RawMessage) error {
 			return err
 		}
 
-		//if l.Category == "Math" {
-		//	err = l.Param.Math.Unmarshall(l.Type, layer["param"])
-		//	continue
-		//}
-
-		switch l.Type {
-		case "Input":
-			err = json.Unmarshal(layer["param"], &l.Param.Input)
-			if err != nil {
-				return err
-			}
-		case "Conv2D":
-			err = json.Unmarshal(layer["param"], &l.Param.Conv2D)
-			if err != nil {
-				return err
-			}
-		case "Dense":
-			err = json.Unmarshal(layer["param"], &l.Param.Dense)
-			if err != nil {
-				return err
-			}
-		case "AveragePooling2D":
-			err = json.Unmarshal(layer["param"], &l.Param.AveragePooling2D)
-			if err != nil {
-				return err
-			}
-		case "MaxPool2D":
-			err = json.Unmarshal(layer["param"], &l.Param.MaxPool2D)
-			if err != nil {
-				return err
-			}
-		case "Activation":
-			err = json.Unmarshal(layer["param"], &l.Param.Activation)
-			if err != nil {
-				return err
-			}
-		case "Dropout":
-			err = json.Unmarshal(layer["param"], &l.Param.Dropout)
-			if err != nil {
-				return err
-			}
-		case "BatchNormalization":
-			err = json.Unmarshal(layer["param"], &l.Param.BatchNormalization)
-			if err != nil {
-				return err
-			}
-		case "Flatten":
-			err = json.Unmarshal(layer["param"], &l.Param.Flatten)
-			if err != nil {
-				return err
-			}
-		case "Rescaling":
-			err = json.Unmarshal(layer["param"], &l.Param.Rescaling)
-			if err != nil {
-				return err
-			}
-		case "Reshape":
-			err = json.Unmarshal(layer["param"], &l.Param.Reshape)
-			if err != nil {
-				return err
-			}
+		switch l.Category {
+		case "Layer":
+			err = l.Param.Keras.BindKeras(l.Type, layer["param"])
+		case "Math":
+			err = l.Param.Math.BindMath(l.Type, layer["param"])
 		default:
-			return fmt.Errorf("inavlid node type")
+			return fmt.Errorf(ErrUnsupportedCategoryType)
 		}
 		c.Layers = append(c.Layers, l)
 	}

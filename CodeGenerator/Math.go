@@ -6,12 +6,17 @@ import (
 )
 
 const (
+	ErrUnsupportedMathType = "unsupported math layer type"
+	ErrInsufficientNumOfInput = "number of input layers is insufficient"
+)
+
+const (
 	abs   = "abs"
-	add   = "add"
+	add   = "add_n(%s)"
 	ceil  = "ceil"
 	floor = "floor"
 	round = "round"
-	sqrt = "sqrt"
+	sqrt  = "sqrt"
 )
 
 type Math struct {
@@ -20,17 +25,32 @@ type Math struct {
 	Floor
 	Round
 	Sqrt
+	Add
+	Input []string
 }
 
-func (m *Math) Unmarshall(t string, data json.RawMessage) error {
+func (m *Math) BindMath(t string, data json.RawMessage) error {
+	var err error
+	err = nil
+
 	switch t {
-	case "Pow":
-		fmt.Println("Pow!")
+	case "Abs":
+		err = json.Unmarshal(data, &m.Abs)
+	case "Ceil":
+		err = json.Unmarshal(data, &m.Ceil)
+	case "Floor":
+		err = json.Unmarshal(data, &m.Floor)
+	case "Round":
+		err = json.Unmarshal(data, &m.Round)
+	case "Sqrt":
+		err = json.Unmarshal(data, &m.Sqrt)
+	case "Add":
+		err = json.Unmarshal(data, &m.Add)
 	default:
-		return json.Unmarshal(data, m)
+		err = fmt.Errorf("unspported math layer type")
 	}
 
-	return nil
+	return err
 }
 
 func (m *Math) GetCode(t string) (string, error) {
@@ -45,8 +65,10 @@ func (m *Math) GetCode(t string) (string, error) {
 		return m.Round.GetCode()
 	case "Sqrt":
 		return m.Sqrt.GetCode()
+	case "Add":
+		return m.Add.GetCode(m.Input)
 	default:
-		return "", fmt.Errorf("invalid math node type")
+		return "", fmt.Errorf(ErrUnsupportedMathType)
 	}
 }
 
@@ -83,4 +105,26 @@ type Sqrt struct {
 
 func (s *Sqrt) GetCode() (string, error) {
 	return sqrt, nil
+}
+
+type Add struct {
+}
+
+func (a *Add) GetCode(inputs []string) (string, error) {
+	n := len(inputs)
+	if n < 2 {
+		return "", fmt.Errorf(ErrInsufficientNumOfInput)
+	}
+
+	var params string
+
+	for i, input := range inputs {
+		params += input
+		if i < n - 1 {
+			params += ", "
+		}
+	}
+	params= fmt.Sprintf(add, params)
+
+	return params, nil
 }

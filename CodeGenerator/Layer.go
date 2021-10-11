@@ -1,6 +1,7 @@
 package CodeGenerator
 
 import (
+	"encoding/json"
 	"fmt"
 )
 
@@ -11,6 +12,32 @@ type Layer struct {
 	Input    []string `json:"input"`
 	Output   []string `json:"output"`
 	Param    Param   `json:"param"`
+}
+
+func UnmarshalLayer(data map[string]json.RawMessage) (Layer, error) {
+	var res Layer
+	err := json.Unmarshal(data["category"], &res.Category)
+	if err != nil {
+		return res, err
+	}
+	err = json.Unmarshal(data["type"], &res.Type)
+	if err != nil {
+		return res, err
+	}
+	err = json.Unmarshal(data["name"], &res.Name)
+	if err != nil {
+		return res, err
+	}
+	err = json.Unmarshal(data["input"], &res.Input)
+	if err != nil {
+		return res, err
+	}
+	err = json.Unmarshal(data["output"], &res.Output)
+	if err != nil {
+		return res, err
+	}
+
+	return res, nil
 }
 
 func (l *Layer) GetVariables() (string, error) {
@@ -36,6 +63,7 @@ func (l *Layer) GetVariables() (string, error) {
 }
 
 func (l *Layer) GenMathVariable() (string, error) {
+	l.Param.Math.Input = l.Input
 	param, err := l.Param.Math.GetCode(l.Type)
 	if err != nil {
 		return "", err
@@ -47,7 +75,7 @@ func (l *Layer) GenMathVariable() (string, error) {
 }
 
 func (l *Layer) GenLayerVariable() (string, error) {
-	param, err := l.Param.GetCode(l.Type)
+	param, err := l.Param.Keras.GetCode(l.Type)
 	if err != nil {
 		return "", err
 	}
