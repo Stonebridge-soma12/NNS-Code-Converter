@@ -27,6 +27,10 @@
 #### v1.31 (2021-08-05)
 - 한 노드에 여러 입출력 처리 추가
     - 레이어 변수명 먼저 모두 선언 후 Input 레이어부터 BFS로 순회하며 각 레이어 연걸.
+    
+#### v1.311 (2021-10-11)
+- Math 모듈 추가
+    - add, subtract, log 추가
 
 # Supports
 ### [Tensorflow-Keras](https://www.tensorflow.org/?hl=ko)
@@ -63,6 +67,23 @@
   - Reshape
     - target_shape - integer tuple
 
+### Math
+- Abs
+    - 텐서의 원소를 모두 절댓값으로 변환
+- Ceil
+    - 텐서의 원소를 올림
+- Round
+    - 텐서의 원소를 내림
+- Sqrt
+    - 텐서의 원소를 Squre root
+- Add
+    - 두 텐서를 각 원소끼리 더함
+    - 반드시 두 개의 레이어가 Add 레이어로 들어가야함
+- Subtract
+    - 두 텐서를 각 원소끼리 뺌
+    - 반드시 두 개의 레이어가 Subtract 레이어로 들어가야함
+- Log
+    - 텐서의 원소에 Log
 
 ### Optimizer
 - Adadelta
