@@ -6,8 +6,17 @@ import (
 )
 
 const (
-	ErrUnsupportedMathType = "unsupported math layer type"
+	ErrUnsupportedMathType    = "unsupported math layer type"
 	ErrInsufficientNumOfInput = "number of input layers is insufficient"
+)
+
+const (
+	typeAbs   = "Abs"
+	typeCeil  = "Ceil"
+	typeFloor = "Floor"
+	typeRound = "Round"
+	typeSqrt  = "Sqrt"
+	typeAdd   = "Add"
 )
 
 const (
@@ -34,20 +43,20 @@ func (m *Math) BindMath(t string, data json.RawMessage) error {
 	err = nil
 
 	switch t {
-	case "Abs":
+	case typeAbs:
 		err = json.Unmarshal(data, &m.Abs)
-	case "Ceil":
+	case typeCeil:
 		err = json.Unmarshal(data, &m.Ceil)
-	case "Floor":
+	case typeFloor:
 		err = json.Unmarshal(data, &m.Floor)
-	case "Round":
+	case typeRound:
 		err = json.Unmarshal(data, &m.Round)
-	case "Sqrt":
+	case typeSqrt:
 		err = json.Unmarshal(data, &m.Sqrt)
-	case "Add":
+	case typeAdd:
 		err = json.Unmarshal(data, &m.Add)
 	default:
-		err = fmt.Errorf("unspported math layer type")
+		err = fmt.Errorf(ErrUnsupportedMathType)
 	}
 
 	return err
@@ -55,17 +64,17 @@ func (m *Math) BindMath(t string, data json.RawMessage) error {
 
 func (m *Math) GetCode(t string) (string, error) {
 	switch t {
-	case "Abs":
+	case typeAbs:
 		return m.Abs.GetCode()
-	case "Ceil":
+	case typeCeil:
 		return m.Ceil.GetCode()
-	case "Floor":
+	case typeFloor:
 		return m.Floor.GetCode()
-	case "Round":
+	case typeRound:
 		return m.Round.GetCode()
-	case "Sqrt":
+	case typeSqrt:
 		return m.Sqrt.GetCode()
-	case "Add":
+	case typeAdd:
 		return m.Add.GetCode(m.Input)
 	default:
 		return "", fmt.Errorf(ErrUnsupportedMathType)
@@ -120,11 +129,11 @@ func (a *Add) GetCode(inputs []string) (string, error) {
 
 	for i, input := range inputs {
 		params += input
-		if i < n - 1 {
+		if i < n-1 {
 			params += ", "
 		}
 	}
-	params= fmt.Sprintf(add, params)
+	params = fmt.Sprintf(add, params)
 
 	return params, nil
 }
