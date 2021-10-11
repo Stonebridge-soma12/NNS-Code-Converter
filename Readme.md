@@ -133,14 +133,6 @@
     - momentum - float
     - nesterov - boolean : default - false
 
-### Math
-- Abs
-- Ceil
-- Floor
-- Round
-- Sqrt
-
-
 ## 실행 예시
 - 클라이언트로 부터 받은 신경망 정보 JSON 파일
 
