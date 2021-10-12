@@ -1,4 +1,4 @@
-package CodeGenerator
+package codeGenerator
 
 import (
 	"encoding/json"
@@ -6,17 +6,30 @@ import (
 )
 
 const (
-	ErrUnsupportedMathType = "unsupported math layer type"
+	ErrUnsupportedMathType    = "unsupported math layer type"
 	ErrInsufficientNumOfInput = "number of input layers is insufficient"
 )
 
 const (
-	abs   = "abs"
-	add   = "add_n(%s)"
-	ceil  = "ceil"
-	floor = "floor"
-	round = "round"
-	sqrt  = "sqrt"
+	typeAbs   = "Abs"
+	typeCeil  = "Ceil"
+	typeFloor = "Floor"
+	typeRound = "Round"
+	typeSqrt  = "Sqrt"
+	typeAdd   = "Add"
+	typeSub   = "Subtract"
+	typeLog   = "Log"
+)
+
+const (
+	abs      = "abs"
+	add      = "add(%s)"
+	ceil     = "ceil"
+	floor    = "floor"
+	round    = "round"
+	sqrt     = "sqrt"
+	subtract = "subtract"
+	log      = "log"
 )
 
 type Math struct {
@@ -26,6 +39,8 @@ type Math struct {
 	Round
 	Sqrt
 	Add
+	Sub
+	Log
 	Input []string
 }
 
@@ -34,20 +49,24 @@ func (m *Math) BindMath(t string, data json.RawMessage) error {
 	err = nil
 
 	switch t {
-	case "Abs":
+	case typeAbs:
 		err = json.Unmarshal(data, &m.Abs)
-	case "Ceil":
+	case typeCeil:
 		err = json.Unmarshal(data, &m.Ceil)
-	case "Floor":
+	case typeFloor:
 		err = json.Unmarshal(data, &m.Floor)
-	case "Round":
+	case typeRound:
 		err = json.Unmarshal(data, &m.Round)
-	case "Sqrt":
+	case typeSqrt:
 		err = json.Unmarshal(data, &m.Sqrt)
-	case "Add":
+	case typeAdd:
 		err = json.Unmarshal(data, &m.Add)
+	case typeSub:
+		err = json.Unmarshal(data, &m.Sub)
+	case typeLog:
+		err = json.Unmarshal(data, &m.Log)
 	default:
-		err = fmt.Errorf("unspported math layer type")
+		err = fmt.Errorf(ErrUnsupportedMathType)
 	}
 
 	return err
@@ -55,18 +74,22 @@ func (m *Math) BindMath(t string, data json.RawMessage) error {
 
 func (m *Math) GetCode(t string) (string, error) {
 	switch t {
-	case "Abs":
+	case typeAbs:
 		return m.Abs.GetCode()
-	case "Ceil":
+	case typeCeil:
 		return m.Ceil.GetCode()
-	case "Floor":
+	case typeFloor:
 		return m.Floor.GetCode()
-	case "Round":
+	case typeRound:
 		return m.Round.GetCode()
-	case "Sqrt":
+	case typeSqrt:
 		return m.Sqrt.GetCode()
-	case "Add":
+	case typeAdd:
 		return m.Add.GetCode(m.Input)
+	case typeSub:
+		return m.Sub.GetCode(m.Input)
+	case typeLog:
+		return m.Log.GetCode()
 	default:
 		return "", fmt.Errorf(ErrUnsupportedMathType)
 	}
@@ -111,6 +134,24 @@ type Add struct {
 }
 
 func (a *Add) GetCode(inputs []string) (string, error) {
+	return overTwoInputs(inputs, add)
+}
+
+type Sub struct {
+}
+
+func (s *Sub) GetCode(inputs []string) (string, error) {
+	return overTwoInputs(inputs, subtract)
+}
+
+type Log struct {
+}
+
+func (l *Log) GetCode() (string, error) {
+	return log, nil
+}
+
+func overTwoInputs(inputs []string, codeBase string) (string, error) {
 	n := len(inputs)
 	if n < 2 {
 		return "", fmt.Errorf(ErrInsufficientNumOfInput)
@@ -120,11 +161,11 @@ func (a *Add) GetCode(inputs []string) (string, error) {
 
 	for i, input := range inputs {
 		params += input
-		if i < n - 1 {
+		if i < n-1 {
 			params += ", "
 		}
 	}
-	params= fmt.Sprintf(add, params)
+	params = fmt.Sprintf(codeBase, params)
 
 	return params, nil
 }

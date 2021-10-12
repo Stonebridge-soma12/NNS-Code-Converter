@@ -1,4 +1,4 @@
-package CodeGenerator
+package codeGenerator
 
 type Queue struct {
 	items []interface{}

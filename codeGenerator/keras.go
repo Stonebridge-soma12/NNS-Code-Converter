@@ -1,4 +1,4 @@
-package CodeGenerator
+package codeGenerator
 
 import (
 	"encoding/json"
@@ -8,6 +8,20 @@ import (
 
 const (
 	ErrUnsupportedKerasLayerType = "unsupported keras layer type"
+)
+
+const (
+	typeInput = "Input"
+	typeConv2D = "Conv2D"
+	typeDense = "Dense"
+	typeAvgPool2D = "AveragePooling2D"
+	typeMaxPool2D = "MaxPool2D"
+	typeActivation = "Activation"
+	typeDropOut = "Dropout"
+	typeBatchNorm = "BatchNormalization"
+	typeFlatten = "Flatten"
+	typeRescaling = "Rescaling"
+	typeReshape = "Reshape"
 )
 
 const (
@@ -31,57 +45,57 @@ func (k *Keras) BindKeras(t string, data json.RawMessage) error {
 	err = nil
 
 	switch t {
-	case "Input":
+	case typeInput:
 		err = json.Unmarshal(data, &k.Input)
 		if err != nil {
 			return err
 		}
-	case "Conv2D":
-		err = json.Unmarshal(data, &k.Conv2D)
-		if err != nil {
-			return err
-		}
-	case "Dense":
+	case typeDense:
 		err = json.Unmarshal(data, &k.Dense)
 		if err != nil {
 			return err
 		}
-	case "AveragePooling2D":
+	case typeConv2D:
+		err = json.Unmarshal(data, &k.Conv2D)
+		if err != nil {
+			return err
+		}
+	case typeAvgPool2D:
 		err = json.Unmarshal(data, &k.AveragePooling2D)
 		if err != nil {
 			return err
 		}
-	case "MaxPool2D":
+	case typeMaxPool2D:
 		err = json.Unmarshal(data, &k.MaxPool2D)
 		if err != nil {
 			return err
 		}
-	case "Activation":
+	case typeActivation:
 		err = json.Unmarshal(data, &k.Activation)
 		if err != nil {
 			return err
 		}
-	case "Dropout":
+	case typeDropOut:
 		err = json.Unmarshal(data, &k.Dropout)
 		if err != nil {
 			return err
 		}
-	case "BatchNormalization":
+	case typeBatchNorm:
 		err = json.Unmarshal(data, &k.BatchNormalization)
 		if err != nil {
 			return err
 		}
-	case "Flatten":
+	case typeFlatten:
 		err = json.Unmarshal(data, &k.Flatten)
 		if err != nil {
 			return err
 		}
-	case "Rescaling":
+	case typeRescaling:
 		err = json.Unmarshal(data, &k.Rescaling)
 		if err != nil {
 			return err
 		}
-	case "Reshape":
+	case typeReshape:
 		err = json.Unmarshal(data, &k.Reshape)
 		if err != nil {
 			return err
@@ -96,27 +110,27 @@ func (k *Keras) BindKeras(t string, data json.RawMessage) error {
 // GetCode converting module to code.
 func (k *Keras) GetCode(t string) (string, error) {
 	switch t {
-	case "Input":
+	case typeInput:
 		return k.Input.GetCode()
-	case "Dense":
+	case typeDense:
 		return k.Dense.GetCode()
-	case "Conv2D":
+	case typeConv2D:
 		return k.Conv2D.GetCode()
-	case "AveragePooling2D":
+	case typeAvgPool2D:
 		return k.AveragePooling2D.GetCode()
-	case "MaxPool2D":
+	case typeMaxPool2D:
 		return k.MaxPool2D.GetCode()
-	case "Activation":
+	case typeActivation:
 		return k.Activation.GetCode()
-	case "Dropout":
+	case typeDropOut:
 		return k.Dropout.GetCode()
-	case "BatchNormalization":
+	case typeBatchNorm:
 		return k.BatchNormalization.GetCode()
-	case "Flatten":
+	case typeFlatten:
 		return k.Flatten.GetCode()
-	case "Rescaling":
+	case typeRescaling:
 		return k.Rescaling.GetCode()
-	case "Reshape":
+	case typeReshape:
 		return k.Reshape.GetCode()
 	default:
 		return "", fmt.Errorf(ErrUnsupportedKerasLayerType)

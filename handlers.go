@@ -1,9 +1,9 @@
 package main
 
 import (
-	"codeconverter/CodeGenerator"
-	"codeconverter/Config"
-	"codeconverter/MessageQ"
+	"codeconverter/codeGenerator"
+	"codeconverter/config"
+	"codeconverter/messageQ"
 	"encoding/json"
 	"fmt"
 	"github.com/labstack/echo/v4"
@@ -12,8 +12,8 @@ import (
 	"strconv"
 )
 
-func MakeModel(c echo.Context) error {
-	var project CodeGenerator.Project
+func MakeModelHandler(c echo.Context) error {
+	var project codeGenerator.Project
 	err := project.BindProject(c.Request())
 	if err != nil {
 		return c.String(http.StatusBadRequest, err.Error())
@@ -38,8 +38,8 @@ func MakeModel(c echo.Context) error {
 	return nil
 }
 
-func Fit(c echo.Context) error {
-	var project CodeGenerator.Project
+func FitHandler(c echo.Context) error {
+	var project codeGenerator.Project
 
 	err := project.BindProject(c.Request())
 	if err != nil {
@@ -53,12 +53,12 @@ func Fit(c echo.Context) error {
 
 	// Zip saved model
 	targetBase := fmt.Sprintf("./%d/", project.UserId)
-	files, err := CodeGenerator.GetFileLists(targetBase + "Model")
+	files, err := codeGenerator.GetFileLists(targetBase + "Model")
 	if err != nil {
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
 
-	err = CodeGenerator.Zip(targetBase + "Model.zip", files)
+	err = codeGenerator.Zip(targetBase + "Model.zip", files)
 	if err != nil {
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
@@ -76,7 +76,7 @@ func Fit(c echo.Context) error {
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
 
-	conn, err := MessageQ.CreateConnection(cfg.Account, cfg.Pw, cfg.Host, cfg.VHost)
+	conn, err := messageQ.CreateConnection(cfg.Account, cfg.Pw, cfg.Host, cfg.VHost)
 	if err != nil {
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
@@ -90,7 +90,7 @@ func Fit(c echo.Context) error {
 	return nil
 }
 
-func GetSavedModel(c echo.Context) error {
+func GetSavedModelHandler(c echo.Context) error {
 	userId, _ := strconv.ParseInt(c.Request().Header.Get("id"), 10, 64)
 	target := fmt.Sprintf("./%d/", userId)
 	return c.File(target + "Model.zip")

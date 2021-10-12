@@ -1,4 +1,4 @@
-package CodeGenerator
+package codeGenerator
 
 import (
 	"encoding/json"
@@ -6,13 +6,27 @@ import (
 )
 
 type Layer struct {
-	Category string  `json:"category"`
-	Type     string  `json:"type"`
-	Name     string  `json:"name"`
+	Category string   `json:"category"`
+	Type     string   `json:"type"`
+	Name     string   `json:"name"`
 	Input    []string `json:"input"`
 	Output   []string `json:"output"`
-	Param    Param   `json:"param"`
+	Param    Param    `json:"param"`
 }
+
+const (
+	categoryLayer = "Layer"
+	categoryMath  = "Math"
+)
+
+const (
+	ErrUnsupportedCategory = "unsupported category"
+)
+
+const (
+	variableString   = "%s = %s.%s\n"
+	connectionString = "%s = %s(%s)\n"
+)
 
 func UnmarshalLayer(data map[string]json.RawMessage) (Layer, error) {
 	var res Layer
@@ -45,18 +59,18 @@ func (l *Layer) GetVariables() (string, error) {
 	var err error
 
 	switch l.Category {
-	case "Layer":
+	case categoryLayer:
 		result, err = l.GenLayerVariable()
 		if err != nil {
 			return "", err
 		}
-	case "Math":
+	case categoryMath:
 		result, err = l.GenMathVariable()
 		if err != nil {
 			return "", err
 		}
 	default:
-		return "", fmt.Errorf("invalid node category")
+		return "", fmt.Errorf(ErrUnsupportedCategory)
 	}
 
 	return result, err
@@ -69,7 +83,7 @@ func (l *Layer) GenMathVariable() (string, error) {
 		return "", err
 	}
 
-	result := fmt.Sprintf("%s = %s.%s\n", l.Name, tf + keras + math, param)
+	result := fmt.Sprintf(variableString, l.Name, tf+keras+math, param)
 
 	return result, nil
 }
@@ -80,7 +94,7 @@ func (l *Layer) GenLayerVariable() (string, error) {
 		return "", err
 	}
 
-	result := fmt.Sprintf("%s = %s.%s\n", l.Name, tf + keras + layers, param)
+	result := fmt.Sprintf(variableString, l.Name, tf+keras+layers, param)
 
 	return result, nil
 }
@@ -95,7 +109,7 @@ func (l *Layer) ConnectLayer() string {
 		inputs += fmt.Sprintf(", %s", l.Input[i])
 	}
 
-	result := fmt.Sprintf("%s = %s(%s)\n", l.Name, l.Name, inputs)
+	result := fmt.Sprintf(connectionString, l.Name, l.Name, inputs)
 
 	return result
 }
