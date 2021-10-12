@@ -25,11 +25,10 @@ jobs:
         env:
           ENV_FILE: ${{ secrets.ENV_FILE }}
         run: |
-          touch config.dev.yaml
-          echo $ENV_FILE >> config.dev.yaml
+          echo "$ENV_FILE" >> config.dev.yaml
           cat config.dev.yaml
 
-      - name: Set config file
+      - name: Deploy config file
         uses: easingthemes/ssh-deploy@main
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_KEY }}
