@@ -72,8 +72,10 @@
     - 텐서의 원소를 모두 절댓값으로 변환
 - Ceil
     - 텐서의 원소를 올림
-- Round
+- Floor
     - 텐서의 원소를 내림
+- Round
+    - 텐서의 원소를 반올림
 - Sqrt
     - 텐서의 원소를 Squre root
 - Add
