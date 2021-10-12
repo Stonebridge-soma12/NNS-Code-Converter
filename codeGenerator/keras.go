@@ -1,10 +1,27 @@
-package CodeGenerator
+package codeGenerator
 
 import (
 	"encoding/json"
 	"fmt"
-	"reflect"
 	"strconv"
+)
+
+const (
+	ErrUnsupportedKerasLayerType = "unsupported keras layer type"
+)
+
+const (
+	typeInput = "Input"
+	typeConv2D = "Conv2D"
+	typeDense = "Dense"
+	typeAvgPool2D = "AveragePooling2D"
+	typeMaxPool2D = "MaxPool2D"
+	typeActivation = "Activation"
+	typeDropOut = "Dropout"
+	typeBatchNorm = "BatchNormalization"
+	typeFlatten = "Flatten"
+	typeRescaling = "Rescaling"
+	typeReshape = "Reshape"
 )
 
 const (
@@ -23,101 +40,101 @@ const (
 	reshape      = `Reshape(target_shape=(%s))`
 )
 
-type Param struct {
-	Math
+func (k *Keras) BindKeras(t string, data json.RawMessage) error {
+	var err error
+	err = nil
 
-	Conv2D
-	Dense
-	AveragePooling2D
-	MaxPool2D
-	Activation
-	Input
-	Dropout
-	BatchNormalization
-	Flatten
-	Rescaling
-	Reshape
-}
+	switch t {
+	case typeInput:
+		err = json.Unmarshal(data, &k.Input)
+		if err != nil {
+			return err
+		}
+	case typeDense:
+		err = json.Unmarshal(data, &k.Dense)
+		if err != nil {
+			return err
+		}
+	case typeConv2D:
+		err = json.Unmarshal(data, &k.Conv2D)
+		if err != nil {
+			return err
+		}
+	case typeAvgPool2D:
+		err = json.Unmarshal(data, &k.AveragePooling2D)
+		if err != nil {
+			return err
+		}
+	case typeMaxPool2D:
+		err = json.Unmarshal(data, &k.MaxPool2D)
+		if err != nil {
+			return err
+		}
+	case typeActivation:
+		err = json.Unmarshal(data, &k.Activation)
+		if err != nil {
+			return err
+		}
+	case typeDropOut:
+		err = json.Unmarshal(data, &k.Dropout)
+		if err != nil {
+			return err
+		}
+	case typeBatchNorm:
+		err = json.Unmarshal(data, &k.BatchNormalization)
+		if err != nil {
+			return err
+		}
+	case typeFlatten:
+		err = json.Unmarshal(data, &k.Flatten)
+		if err != nil {
+			return err
+		}
+	case typeRescaling:
+		err = json.Unmarshal(data, &k.Rescaling)
+		if err != nil {
+			return err
+		}
+	case typeReshape:
+		err = json.Unmarshal(data, &k.Reshape)
+		if err != nil {
+			return err
+		}
+	default:
+		err = fmt.Errorf(ErrUnsupportedKerasLayerType)
+	}
 
-func UnmarshalLayer(data map[string]json.RawMessage) (Layer, error) {
-	var res Layer
-	err := json.Unmarshal(data["category"], &res.Category)
-	if err != nil {
-		return res, err
-	}
-	err = json.Unmarshal(data["type"], &res.Type)
-	if err != nil {
-		return res, err
-	}
-	err = json.Unmarshal(data["name"], &res.Name)
-	if err != nil {
-		return res, err
-	}
-	err = json.Unmarshal(data["input"], &res.Input)
-	if err != nil {
-		return res, err
-	}
-	err = json.Unmarshal(data["output"], &res.Output)
-	if err != nil {
-		return res, err
-	}
-
-	return res, nil
+	return err
 }
 
 // GetCode converting module to code.
-func (p *Param) GetCode(t string) (string, error) {
+func (k *Keras) GetCode(t string) (string, error) {
 	switch t {
-	case "Input":
-		return p.Input.GetCode()
-	case "Dense":
-		return p.Dense.GetCode()
-	case "Conv2D":
-		return p.Conv2D.GetCode()
-	case "AveragePooling2D":
-		return p.AveragePooling2D.GetCode()
-	case "MaxPool2D":
-		return p.MaxPool2D.GetCode()
-	case "Activation":
-		return p.Activation.GetCode()
-	case "Dropout":
-		return p.Dropout.GetCode()
-	case "BatchNormalization":
-		return p.BatchNormalization.GetCode()
-	case "Flatten":
-		return p.Flatten.GetCode()
-	case "Rescaling":
-		return p.Rescaling.GetCode()
-	case "Reshape":
-		return p.Reshape.GetCode()
+	case typeInput:
+		return k.Input.GetCode()
+	case typeDense:
+		return k.Dense.GetCode()
+	case typeConv2D:
+		return k.Conv2D.GetCode()
+	case typeAvgPool2D:
+		return k.AveragePooling2D.GetCode()
+	case typeMaxPool2D:
+		return k.MaxPool2D.GetCode()
+	case typeActivation:
+		return k.Activation.GetCode()
+	case typeDropOut:
+		return k.Dropout.GetCode()
+	case typeBatchNorm:
+		return k.BatchNormalization.GetCode()
+	case typeFlatten:
+		return k.Flatten.GetCode()
+	case typeRescaling:
+		return k.Rescaling.GetCode()
+	case typeReshape:
+		return k.Reshape.GetCode()
 	default:
-		return "", fmt.Errorf("The type is not available")
+		return "", fmt.Errorf(ErrUnsupportedKerasLayerType)
 	}
-}
-
-// For check there is any empty fields in Param
-func checkNil(object interface{}) error {
-	// Parameter object MUST BE POINTER STRUCT
-
-	errorString := ""
-
-	e := reflect.ValueOf(object).Elem()
-	n := e.NumField()
-	for i := 0; i < n; i++ {
-		value := e.Field(i)
-		tType := e.Type()
-
-		// append error which field is nil
-		if reflect.ValueOf(value.Interface()).IsNil() {
-			errorString += fmt.Sprintf("field %s is nil\n", tType.Field(i).Name)
-		}
-	}
-
-	if errorString == "" {
-		return nil
-	}
-
-	return fmt.Errorf(errorString)
 }
 
 // Conv2D Convolution 2D layer
@@ -293,4 +310,18 @@ func (r *Reshape) GetCode() (string, error) {
 	}
 
 	return fmt.Sprintf(reshape, shape), nil
+}
+
+type Keras struct {
+	Conv2D
+	Dense
+	AveragePooling2D
+	MaxPool2D
+	Activation
+	Input
+	Dropout
+	BatchNormalization
+	Flatten
+	Rescaling
+	Reshape
 }

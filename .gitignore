@@ -9,9 +9,10 @@
 
 MNIST/
 elixter/
+2/
 
 *.zip
 
-Config/config.dev.yaml
+config/config.dev.yaml
 
 *.sql

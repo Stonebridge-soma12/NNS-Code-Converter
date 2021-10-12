@@ -1,4 +1,4 @@
-package MessageQ
+package messageQ
 
 import (
 	"fmt"

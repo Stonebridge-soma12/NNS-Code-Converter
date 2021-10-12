@@ -1,4 +1,4 @@
-package CodeGenerator
+package codeGenerator
 
 import (
 	"encoding/json"
@@ -6,19 +6,22 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+	"strconv"
 )
 
 type Project struct {
-	UserId  string  `header:"id"`
+	TrainId int64   `json:"train_id"`
+	UserId  int64   `header:"user_id"`
 	Config  Config  `json:"config"`
 	DataSet DataSet `json:"data_set"`
 	Content Content `json:"content"`
 }
 
 type Train struct {
+	TrainId int64   `json:"train_id"`
+	UserId  int64   `json:"user_id"`
 	Config  Config  `json:"config"`
 	DataSet DataSet `json:"data_set"`
-	UserId  string  `json:"id"`
 }
 
 const (
@@ -42,7 +45,7 @@ func (p *Project) BindProject(r *http.Request) error {
 		return err
 	}
 
-	p.UserId = r.Header.Get("id")
+	p.UserId, _ = strconv.ParseInt(r.Header.Get("id"), 10, 64)
 
 	// Unmarshalling Config.
 	var config map[string]json.RawMessage
@@ -67,6 +70,11 @@ func (p *Project) BindProject(r *http.Request) error {
 		return err
 	}
 
+	err = json.Unmarshal(data["train_id"], &p.TrainId)
+	if err != nil {
+		return err
+	}
+
 	err = p.Content.BindContent(cc)
 	if err != nil {
 		return err
@@ -81,7 +89,7 @@ func (p *Project) SaveModel() error {
 		return err
 	}
 
-	err = p.SaveModel()
+	err = p.GenerateSaveModel()
 	if err != nil {
 		return err
 	}
@@ -129,7 +137,7 @@ func (p *Project) GenerateSaveModel() error {
 	codes = append(codes, "import model\n\n")
 
 	// Python comment.
-	saveCode := fmt.Sprintf("model.model.save('./%s/Model')", p.UserId)
+	saveCode := fmt.Sprintf("model.model.save('./%d/Model')", p.UserId)
 	codes = append(codes, saveCode)
 
 	// Generate train python file
@@ -142,5 +150,12 @@ func (p *Project) GenerateSaveModel() error {
 }
 
 func (p *Project) GetTrainBody() Train {
-	return Train{DataSet: p.DataSet, UserId: p.UserId, Config: p.Config}
+	trainInfo := Train{
+		TrainId: p.TrainId,
+		UserId:  p.UserId,
+		DataSet: p.DataSet,
+		Config:  p.Config,
+	}
+
+	return trainInfo
 }
