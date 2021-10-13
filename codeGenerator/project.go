@@ -87,6 +87,42 @@ func (p *Project) BindProject(r *http.Request) error {
 	return nil
 }
 
+func (p *Project) BindProjectForCode(r *http.Request) error {
+	data := make(map[string]json.RawMessage)
+	cc := make(map[string]json.RawMessage)
+
+	// Binding request body
+	err := json.NewDecoder(r.Body).Decode(&data)
+	if err != nil {
+		return err
+	}
+
+	// Unmarshalling Config.
+	var config map[string]json.RawMessage
+	err = json.Unmarshal(data["config"], &config)
+	if err != nil {
+		return fmt.Errorf("JSON Error : %s with field %s", err.Error(), "config")
+	}
+
+	err = p.Config.UnmarshalConfig(config)
+	if err != nil {
+		return err
+	}
+
+	// Unmarshalling Content.
+	err = json.Unmarshal(data["content"], &cc)
+	if err != nil {
+		return fmt.Errorf("JSON Error : %s with field %s", err.Error(), "content")
+	}
+
+	err = p.Content.BindContent(cc)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (p *Project) SaveModel() error {
 	err := p.GenerateModel()
 	if err != nil {

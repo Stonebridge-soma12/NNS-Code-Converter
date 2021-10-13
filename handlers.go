@@ -14,7 +14,7 @@ import (
 
 func MakeModelHandler(c echo.Context) error {
 	var project codeGenerator.Project
-	err := project.BindProject(c.Request())
+	err := project.BindProjectForCode(c.Request())
 	if err != nil {
 		return c.String(http.StatusBadRequest, err.Error())
 	}
