@@ -1,0 +1,61 @@
+name: Go
+
+on:
+  push:
+    branches: [ master ]
+#   pull_request:
+#     branches: [ master ]
+
+jobs:
+  cicd:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.17
+
+      - name: Build
+        run: |
+          go build -v
+
+      - name: Make config file
+        env:
+          ENV_FILE: ${{ secrets.ENV_FILE }}
+        run: |
+          echo "$ENV_FILE" >> config.dev.yaml
+          cat config.dev.yaml
+
+      - name: Deploy config file
+        uses: easingthemes/ssh-deploy@main
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_KEY }}
+          #          ARGS: "-rltgoDzvO --delete"
+          SOURCE: "config.dev.yaml"
+          REMOTE_HOST: ${{ secrets.SSH_HOST }}
+          REMOTE_USER: ${{ secrets.SSH_USERNAME }}
+          TARGET: ${{ secrets.REMOTE_CONFIG_FILE_TARGET }}
+
+      - name: Deploy to Server
+        uses: easingthemes/ssh-deploy@main
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_KEY }}
+          #          ARGS: "-rltgoDzvO --delete"
+          SOURCE: "./"
+          REMOTE_HOST: ${{ secrets.SSH_HOST }}
+          REMOTE_USER: ${{ secrets.SSH_USERNAME }}
+          TARGET: ${{ secrets.REMOTE_TARGET }}
+
+      - name: Executing remote ssh commands using password
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          script_stop: true
+          script: |
+            sudo systemctl restart codeconverter
+            sudo systemctl status codeconverter
