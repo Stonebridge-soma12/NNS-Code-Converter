@@ -27,37 +27,37 @@ func (c *Config) UnmarshalConfig(data map[string]json.RawMessage) error {
 	// Unmarshal optimizer name
 	err := json.Unmarshal(data["optimizer_name"], &c.OptimizerName)
 	if err != nil {
-		return err
+		return fmt.Errorf("JSON Error : %s with field %s", err.Error(), "optimizer_name")
 	}
 
 	err = c.OptimizerConfig.BindOptimizer(c.OptimizerName, data["optimizer_config"])
 	if err != nil {
-		return err
+		return fmt.Errorf("JSON Error : %s with field %s", err.Error(), "optimizer_config")
 	}
 
 	err = json.Unmarshal(data["loss"], &c.Loss)
 	if err != nil {
-		return err
+		return fmt.Errorf("JSON Error : %s with field %s", err.Error(), "loss")
 	}
 	err = json.Unmarshal(data["metrics"], &c.Metrics)
 	if err != nil {
-		return err
+		return fmt.Errorf("JSON Error : %s with field %s", err.Error(), "metrics")
 	}
 	err = json.Unmarshal(data["batch_size"], &c.BatchSize)
 	if err != nil {
-		return err
+		return fmt.Errorf("JSON Error : %s with field %s", err.Error(), "batch_size")
 	}
 	err = json.Unmarshal(data["epochs"], &c.Epochs)
 	if err != nil {
-		return err
+		return fmt.Errorf("JSON Error : %s with field %s", err.Error(), "epochs")
 	}
 	err = json.Unmarshal(data["early_stop"], &c.EarlyStopping)
 	if err != nil {
-		return err
+		return fmt.Errorf("JSON Error : %s with field %s", err.Error(), "early_stop")
 	}
 	err = json.Unmarshal(data["learning_rate_reduction"], &c.LearningRateReduction)
 	if err != nil {
-		return err
+		return fmt.Errorf("JSON Error : %s with field %s", err.Error(), "learning_rate_reduction")
 	}
 
 	return nil

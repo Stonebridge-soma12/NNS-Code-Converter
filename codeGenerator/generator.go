@@ -35,6 +35,10 @@ const (
 	createModel = "model = tf.keras.Model(inputs=%s, outputs=%s)\n\n"
 )
 
+const (
+	ErrInvalidJsonfield = "unexpected end of JSON input"
+)
+
 func (p *Project) BindProject(r *http.Request) error {
 	data := make(map[string]json.RawMessage)
 	cc := make(map[string]json.RawMessage)
@@ -51,7 +55,7 @@ func (p *Project) BindProject(r *http.Request) error {
 	var config map[string]json.RawMessage
 	err = json.Unmarshal(data["config"], &config)
 	if err != nil {
-		return err
+		return fmt.Errorf("JSON Error : %s with field %s", err.Error(), "config")
 	}
 
 	err = p.Config.UnmarshalConfig(config)
@@ -61,18 +65,18 @@ func (p *Project) BindProject(r *http.Request) error {
 
 	err = p.DataSet.Bind(data["data_set"])
 	if err != nil {
-		return err
+		return fmt.Errorf("JSON Error : %s with field %s", err.Error(), "data_set")
 	}
 
 	// Unmarshalling Content.
 	err = json.Unmarshal(data["content"], &cc)
 	if err != nil {
-		return err
+		return fmt.Errorf("JSON Error : %s with field %s", err.Error(), "content")
 	}
 
 	err = json.Unmarshal(data["train_id"], &p.TrainId)
 	if err != nil {
-		return err
+		return fmt.Errorf("JSON Error : %s with field %s", err.Error(), "train_id")
 	}
 
 	err = p.Content.BindContent(cc)

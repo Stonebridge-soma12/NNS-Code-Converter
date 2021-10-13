@@ -20,11 +20,11 @@ func (c *Content) BindContent(data map[string]json.RawMessage) error {
 	// Unmarshalling content input and output.
 	err := json.Unmarshal(data["input"], &c.Input)
 	if err != nil {
-		return err
+		return fmt.Errorf("JSON Error : %s with field %s", err.Error(), "content input")
 	}
 	err = json.Unmarshal(data["output"], &c.Output)
 	if err != nil {
-		return err
+		return fmt.Errorf("JSON Error : %s with field %s", err.Error(), "content output")
 	}
 
 	// Unmarshalling Layers.
