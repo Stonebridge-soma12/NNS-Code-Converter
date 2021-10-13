@@ -6,6 +6,10 @@ import (
 )
 
 const (
+	InputNodeIndex = 0
+)
+
+const (
 	ErrUnsupportedCategoryType = "unsupported category type"
 )
 
@@ -70,7 +74,7 @@ func (c *Content) GenLayers() ([]string, error) {
 
 	// Connect layers through BFS.
 	var q Queue
-	q.Push(layerIdxMap["Input_1"])
+	q.Push(InputNodeIndex)
 	for !q.Empty() {
 		current := q.Pop()
 		layerConn := c.Layers[current.(int)].ConnectLayer()
@@ -91,12 +95,19 @@ func (c *Content) GenLayers() ([]string, error) {
 func (c *Content) GetLayerNameToIdxMap() map[string]int {
 	result := make(map[string]int)
 
-	for i, l := range c.Layers {
-		result[l.Name] = i
+	idx := 1
+	for _, l := range c.Layers {
+		if l.Type == "Input" {
+			result[l.Name] = 0
+		} else {
+			result[l.Name] = idx
+			idx += 1
+		}
 	}
 
 	return result
 }
+
 //
 //func SortLayers(source []Layer) []Layer {
 //	// Sorting layer components via BFS.
