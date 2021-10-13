@@ -48,7 +48,7 @@ func FitHandler(c echo.Context) error {
 
 	err = project.SaveModel()
 	if err != nil {
-		return c.NoContent(http.StatusInternalServerError)
+		return c.String(http.StatusInternalServerError, err.Error())
 	}
 
 	// Zip saved model
