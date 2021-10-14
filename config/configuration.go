@@ -18,13 +18,13 @@ func GetConfig() (Config, error) {
 	var cf Config
 
 	// base
-	baseCfg, err := ioutil.ReadFile("./Config/config.base.yaml")
+	baseCfg, err := ioutil.ReadFile("./config/config.base.yaml")
 	if err != nil {
 		return cf, err
 	}
 	base := strings.NewReader(string(baseCfg))
 
-	cfg, err := ioutil.ReadFile("./Config/config.dev.yaml")
+	cfg, err := ioutil.ReadFile("./config/config.dev.yaml")
 	if err != nil {
 		return cf, err
 	}
