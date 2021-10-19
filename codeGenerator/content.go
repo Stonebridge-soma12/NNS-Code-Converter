@@ -61,7 +61,7 @@ func (c *Content) BindContent(data map[string]json.RawMessage) error {
 func (c *Content) GenLayers() ([]string, error) {
 	var codes []string
 	// TODO: BFS돌리며 레이어 변수 선언 및 연결
-	layerIdxMap := c.GetLayerNameToIdxMap()
+	layerIdxMap, inputCntMap := c.GetLayerNameToIdxMapAndInputCountMap()
 
 	// Generate layer variables
 	for _, l := range c.Layers {
@@ -81,7 +81,12 @@ func (c *Content) GenLayers() ([]string, error) {
 		codes = append(codes, layerConn)
 
 		for _, next := range c.Layers[current.(int)].Output {
-			q.Push(layerIdxMap[next])
+			// 조건에 맞는 노드만 큐에 push. 즉 해당 노드의 Input 개수만큼 들어왔을 떄에만 큐에 push.
+			inputCntMap[next] -= 1
+
+			if inputCntMap[next] == 0 {
+				q.Push(layerIdxMap[next])
+			}
 		}
 	}
 
@@ -92,69 +97,20 @@ func (c *Content) GenLayers() ([]string, error) {
 	return codes, nil
 }
 
-func (c *Content) GetLayerNameToIdxMap() map[string]int {
-	result := make(map[string]int)
+func (c *Content) GetLayerNameToIdxMapAndInputCountMap() (map[string]int, map[string]int) {
+	indexMap := make(map[string]int)
+	inputCountMap := make(map[string]int)
 
 	idx := 1
 	for _, l := range c.Layers {
 		if l.Type == "Input" {
-			result[l.Name] = 0
+			indexMap[l.Name] = 0
 		} else {
-			result[l.Name] = idx
+			indexMap[l.Name] = idx
 			idx += 1
 		}
+		inputCountMap[l.Name] = len(l.Input)
 	}
 
-	return result
+	return indexMap, inputCountMap
 }
-
-//
-//func SortLayers(source []Layer) []Layer {
-//	// Sorting layer components via BFS.
-//	type node struct {
-//		idx    int
-//		Output *string
-//	}
-//
-//	var result []Layer             // result Content slice.
-//	adj := make(map[string][]node) // adjustment matrix of each nodes.
-//	var inputIdx int
-//
-//	// setup adjustment matrix.
-//	for idx, layer := range source {
-//		// Input layer is always first.u
-//		var input string
-//		if layer.Type == "Input" {
-//			inputIdx = idx
-//
-//			// result = append(result, layer)
-//		}
-//		input = layer.Name
-//
-//		var nodeSlice []node
-//		if adj[input] == nil {
-//			nodeSlice = append(nodeSlice, node{idx, layer.Output})
-//			adj[input] = nodeSlice
-//		} else {
-//			prev, _ := adj[input]
-//			nodeSlice = prev
-//			nodeSlice = append(nodeSlice, node{idx, layer.Output})
-//			adj[input] = nodeSlice
-//		}
-//	}
-//
-//	// Using BFS with queue
-//	var q Queue
-//	q.Push(source[inputIdx].Name)
-//	for !q.Empty() {
-//		current := q.Pop()
-//		for _, next := range adj[current] {
-//			if next.Output != nil {
-//				q.Push(*next.Output)
-//			}
-//			result = append(result, source[next.idx])
-//		}
-//	}
-//
-//	return result
-//}

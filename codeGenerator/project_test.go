@@ -201,3 +201,30 @@ func TestGetFileLists(t *testing.T) {
 
 	fmt.Println(files)
 }
+
+func TestContent_GenLayers(t *testing.T) {
+	testContent := Content{}
+	data := make(map[string]json.RawMessage)
+	testJson, err := os.Open("./test.json")
+	if err != nil {
+		t.Error(err)
+	}
+	defer testJson.Close()
+
+	err = json.NewDecoder(testJson).Decode(&data)
+	if err != nil {
+		t.Error(err)
+	}
+
+	err = testContent.BindContent(data)
+	if err != nil {
+		t.Error(err)
+	}
+
+	result, err := testContent.GenLayers()
+	if err != nil {
+		t.Error(err)
+	}
+
+	fmt.Println(result)
+}
