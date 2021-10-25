@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
-	"strconv"
 )
 
 type Project struct {
@@ -48,8 +47,6 @@ func (p *Project) BindProject(r *http.Request) error {
 	if err != nil {
 		return err
 	}
-
-	p.UserId, _ = strconv.ParseInt(r.Header.Get("id"), 10, 64)
 
 	// Unmarshalling Config.
 	var config map[string]json.RawMessage
