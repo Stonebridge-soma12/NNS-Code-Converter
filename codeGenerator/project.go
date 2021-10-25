@@ -11,7 +11,7 @@ import (
 
 type Project struct {
 	TrainId int64   `json:"train_id"`
-	UserId  int64   `header:"user_id"`
+	UserId  int64   `json:"user_id"`
 	Config  Config  `json:"config"`
 	DataSet DataSet `json:"data_set"`
 	Content Content `json:"content"`
@@ -77,6 +77,11 @@ func (p *Project) BindProject(r *http.Request) error {
 	err = json.Unmarshal(data["train_id"], &p.TrainId)
 	if err != nil {
 		return fmt.Errorf("JSON Error : %s with field %s", err.Error(), "train_id")
+	}
+
+	err = json.Unmarshal(data["user_id"], &p.UserId)
+	if err != nil {
+		return fmt.Errorf("JSON Error : %s with field %s", err.Error(), "user_id")
 	}
 
 	err = p.Content.BindContent(cc)
