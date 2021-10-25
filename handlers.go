@@ -92,6 +92,7 @@ func FitHandler(c echo.Context) error {
 
 func GetSavedModelHandler(c echo.Context) error {
 	userId, _ := strconv.ParseInt(c.Request().Header.Get("id"), 10, 64)
+	fmt.Printf("Model requset %d", userId)
 	target := fmt.Sprintf("./%d/", userId)
 	return c.File(target + "Model.zip")
 }
