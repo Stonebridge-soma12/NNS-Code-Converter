@@ -18,10 +18,11 @@ type Project struct {
 }
 
 type Train struct {
-	TrainId int64   `json:"train_id"`
-	UserId  int64   `json:"user_id"`
-	Config  Config  `json:"config"`
-	DataSet DataSet `json:"data_set"`
+	TrainId   int64   `json:"train_id"`
+	UserId    int64   `json:"user_id"`
+	ProjectNo int     `json:"project_no"`
+	Config    Config  `json:"config"`
+	DataSet   DataSet `json:"data_set"`
 }
 
 const (
@@ -199,10 +200,11 @@ func (p *Project) GenerateSaveModel() error {
 
 func (p *Project) GetTrainBody() Train {
 	trainInfo := Train{
-		TrainId: p.TrainId,
-		UserId:  p.UserId,
-		DataSet: p.DataSet,
-		Config:  p.Config,
+		TrainId:   p.TrainId,
+		UserId:    p.UserId,
+		ProjectNo: p.ProjectNo,
+		DataSet:   p.DataSet,
+		Config:    p.Config,
 	}
 
 	return trainInfo
