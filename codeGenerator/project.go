@@ -36,10 +36,6 @@ const (
 	createModel = "model = tf.keras.Model(inputs=%s, outputs=%s)\n\n"
 )
 
-const (
-	ErrInvalidJsonfield = "unexpected end of JSON input"
-)
-
 func (p *Project) BindProject(r *http.Request) error {
 	data := make(map[string]json.RawMessage)
 	cc := make(map[string]json.RawMessage)
