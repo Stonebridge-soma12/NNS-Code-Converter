@@ -22,14 +22,14 @@ const (
 )
 
 const (
-	abs      = "abs()"
-	add      = "add()"
-	ceil     = "ceil()"
-	floor    = "floor()"
-	round    = "round()"
-	sqrt     = "sqrt()"
-	subtract = "subtract()"
-	log      = "log()"
+	abs      = "abs"
+	add      = "add"
+	ceil     = "ceil"
+	floor    = "floor"
+	round    = "round"
+	sqrt     = "sqrt"
+	subtract = "subtract"
+	log      = "log"
 )
 
 type Math struct {
