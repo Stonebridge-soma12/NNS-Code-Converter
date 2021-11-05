@@ -22,14 +22,14 @@ const (
 )
 
 const (
-	abs      = "abs"
-	add      = "add(%s)"
-	ceil     = "ceil"
-	floor    = "floor"
-	round    = "round"
-	sqrt     = "sqrt"
-	subtract = "subtract"
-	log      = "log"
+	abs      = "abs()"
+	add      = "add()"
+	ceil     = "ceil()"
+	floor    = "floor()"
+	round    = "round()"
+	sqrt     = "sqrt()"
+	subtract = "subtract()"
+	log      = "log()"
 )
 
 type Math struct {
@@ -85,9 +85,9 @@ func (m *Math) GetCode(t string) (string, error) {
 	case typeSqrt:
 		return m.Sqrt.GetCode()
 	case typeAdd:
-		return m.Add.GetCode(m.Input)
+		return m.Add.GetCode()
 	case typeSub:
-		return m.Sub.GetCode(m.Input)
+		return m.Sub.GetCode()
 	case typeLog:
 		return m.Log.GetCode()
 	default:
@@ -133,15 +133,15 @@ func (s *Sqrt) GetCode() (string, error) {
 type Add struct {
 }
 
-func (a *Add) GetCode(inputs []string) (string, error) {
-	return overTwoInputs(inputs, add)
+func (a *Add) GetCode() (string, error) {
+	return add, nil
 }
 
 type Sub struct {
 }
 
-func (s *Sub) GetCode(inputs []string) (string, error) {
-	return overTwoInputs(inputs, subtract)
+func (s *Sub) GetCode() (string, error) {
+	return subtract, nil
 }
 
 type Log struct {
