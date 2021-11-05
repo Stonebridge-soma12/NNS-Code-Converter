@@ -78,12 +78,7 @@ func (l *Layer) GetVariables() (string, error) {
 
 func (l *Layer) GenMathVariable() (string, error) {
 	l.Param.Math.Input = l.Input
-	param, err := l.Param.Math.GetCode(l.Type)
-	if err != nil {
-		return "", err
-	}
-
-	result := fmt.Sprintf(variableString, l.Name, tf+keras+math, param)
+	result := fmt.Sprintf(variableString, l.Name, tf+math, "")
 
 	return result, nil
 }
