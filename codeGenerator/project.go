@@ -162,6 +162,7 @@ func (p *Project) GenerateModel() error {
 		return err
 	}
 	codes = append(codes, Layers...)
+	codes = append(codes, "\n")
 
 	Configs, err := p.Config.GenConfig()
 	if err != nil {
