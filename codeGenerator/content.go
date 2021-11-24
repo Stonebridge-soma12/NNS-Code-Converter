@@ -69,8 +69,11 @@ func (c *Content) GenLayers() ([]string, error) {
 		if err != nil {
 			return nil, err
 		}
-		codes = append(codes, layer)
+		codes = append(codes, layer...)
 	}
+
+	// add new line for separating layer declaration and layer connection.
+	codes = append(codes, "\n# Connect each layer in order\n")
 
 	// Connect layers through BFS.
 	var q Queue

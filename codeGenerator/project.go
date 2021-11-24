@@ -26,7 +26,7 @@ type Train struct {
 }
 
 const (
-	importTf    = "import tensorflow as tf\n\n"
+	importTf    = "import tensorflow as tf\n"
 	importTfa   = "import tensorflow_addons as tfa\n\n"
 	tf          = "tf"
 	tfa         = "tfa"
