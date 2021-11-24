@@ -11,6 +11,8 @@ MNIST/
 elixter/
 2/
 
+__pycache__/
+
 *.zip
 
 config/config.dev.yaml
