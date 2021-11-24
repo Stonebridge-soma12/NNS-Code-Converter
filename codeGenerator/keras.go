@@ -40,6 +40,20 @@ const (
 	reshape      = `Reshape(target_shape=(%s))`
 )
 
+const (
+	commentInput = "# Input layer\n"
+	commentConv2D = "# This layer creates a convolution kernel that is convolved with the layer input to produce a tensor of outputs.\n"
+	commentDense = "# Dense\n"
+	commentAvgPool2D = "# AvgPool2D\n"
+	commentMaxPool2D = "# MaxPool2D\n"
+	commentActivation = "# Activation\n"
+	commentDropOut = "# Dropout\n"
+	commentBatchNorm = "# BatchNorm\n"
+	commentFlatten = "# Flatten\n"
+	commentRescaling = "# Rescaling\n"
+	commentReshape = "# Reshape\n"
+)
+
 func (k *Keras) BindKeras(t string, data json.RawMessage) error {
 	var err error
 	err = nil
@@ -108,7 +122,7 @@ func (k *Keras) BindKeras(t string, data json.RawMessage) error {
 }
 
 // GetCode converting module to code.
-func (k *Keras) GetCode(t string) (string, error) {
+func (k *Keras) GetCode(t string) ([]string, error) {
 	switch t {
 	case typeInput:
 		return k.Input.GetCode()
@@ -133,7 +147,7 @@ func (k *Keras) GetCode(t string) (string, error) {
 	case typeReshape:
 		return k.Reshape.GetCode()
 	default:
-		return "", fmt.Errorf(ErrUnsupportedKerasLayerType)
+		return nil, fmt.Errorf(ErrUnsupportedKerasLayerType)
 	}
 }
 
@@ -145,13 +159,18 @@ type Conv2D struct {
 	Strides    []int   `json:"strides"`
 }
 
-func (c *Conv2D) GetCode() (string, error) {
+func (c *Conv2D) GetCode() ([]string, error) {
 	err := checkNil(c)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	return fmt.Sprintf(conv2d, *c.Filters, c.KernelSize[0], c.KernelSize[1], c.Strides[0], c.Strides[1], *c.Padding), nil
+	var result []string
+	// TODO: Add comment
+	result = append(result, commentConv2D)
+	result = append(result, fmt.Sprintf(conv2d, *c.Filters, c.KernelSize[0], c.KernelSize[1], c.Strides[0], c.Strides[1], *c.Padding))
+
+	return result, nil
 }
 
 // Dense (Affine) layer
@@ -159,13 +178,18 @@ type Dense struct {
 	Units *int `json:"units"`
 }
 
-func (d *Dense) GetCode() (string, error) {
+func (d *Dense) GetCode() ([]string, error) {
 	err := checkNil(d)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	return fmt.Sprintf(dense, *d.Units), nil
+	var result []string
+	// TODO: Add comment
+	result = append(result, commentDense)
+	result = append(result, fmt.Sprintf(dense, *d.Units))
+
+	return result, nil
 }
 
 // AveragePooling2D layer
@@ -175,13 +199,18 @@ type AveragePooling2D struct {
 	Padding  *string `json:"padding"`
 }
 
-func (a *AveragePooling2D) GetCode() (string, error) {
+func (a *AveragePooling2D) GetCode() ([]string, error) {
 	err := checkNil(a)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	return fmt.Sprintf(avgPooling2d, a.PoolSize[0], a.PoolSize[1], a.Strides[0], a.Strides[1], *a.Padding), nil
+	var result []string
+	// TODO: Add comment
+	result = append(result, commentAvgPool2D)
+	result = append(result, fmt.Sprintf(avgPooling2d, a.PoolSize[0], a.PoolSize[1], a.Strides[0], a.Strides[1], *a.Padding))
+
+	return result, nil
 }
 
 // MaxPool2D layer
@@ -191,13 +220,18 @@ type MaxPool2D struct {
 	Padding  *string `json:"padding"`
 }
 
-func (m *MaxPool2D) GetCode() (string, error) {
+func (m *MaxPool2D) GetCode() ([]string, error) {
 	err := checkNil(m)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	return fmt.Sprintf(maxPool2d, m.PoolSize[0], m.PoolSize[1], m.Strides[0], m.Strides[1], *m.Padding), nil
+	var result []string
+	// TODO: Add comment
+	result = append(result, commentMaxPool2D)
+	result = append(result, fmt.Sprintf(maxPool2d, m.PoolSize[0], m.PoolSize[1], m.Strides[0], m.Strides[1], *m.Padding))
+
+	return result, nil
 }
 
 // Activation
@@ -205,13 +239,18 @@ type Activation struct {
 	Activation *string `json:"activation"`
 }
 
-func (a *Activation) GetCode() (string, error) {
+func (a *Activation) GetCode() ([]string, error) {
 	err := checkNil(a)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	return fmt.Sprintf(activation, *a.Activation), nil
+	var result []string
+	// TODO: Add comment
+	result = append(result, commentActivation)
+	result = append(result, fmt.Sprintf(activation, *a.Activation))
+
+	return result, nil
 }
 
 // Input
@@ -219,10 +258,10 @@ type Input struct {
 	Shape     []int `json:"shape"`
 }
 
-func (i *Input) GetCode() (string, error) {
+func (i *Input) GetCode() ([]string, error) {
 	err := checkNil(i)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	var shape string
@@ -233,7 +272,12 @@ func (i *Input) GetCode() (string, error) {
 		}
 	}
 
-	return fmt.Sprintf(input, shape), nil
+	var result []string
+	// TODO: Add comment
+	result = append(result, commentInput)
+	result = append(result, fmt.Sprintf(input, shape))
+
+	return result, nil
 }
 
 // Dropout
@@ -241,13 +285,18 @@ type Dropout struct {
 	Rate *float64 `json:"rate"`
 }
 
-func (d *Dropout) GetCode() (string, error) {
+func (d *Dropout) GetCode() ([]string, error) {
 	err := checkNil(d)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	return fmt.Sprintf(dropout, *d.Rate), nil
+	var result []string
+	// TODO: Add comment
+	result = append(result, commentDropOut)
+	result = append(result, fmt.Sprintf(dropout, *d.Rate))
+
+	return result, nil
 }
 
 // BatchNormalization
@@ -257,13 +306,18 @@ type BatchNormalization struct {
 	Epsilon  *float64 `json:"epsilon"`
 }
 
-func (b *BatchNormalization) GetCode() (string, error) {
+func (b *BatchNormalization) GetCode() ([]string, error) {
 	err := checkNil(b)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	return fmt.Sprintf(batchNorm, *b.Axis, *b.Momentum, *b.Epsilon), nil
+	var result []string
+	// TODO: Add comment
+	result = append(result, commentBatchNorm)
+	result = append(result, fmt.Sprintf(batchNorm, *b.Axis, *b.Momentum, *b.Epsilon))
+
+	return result, nil
 }
 
 // Flatten
@@ -271,8 +325,13 @@ type Flatten struct {
 	// Flatten has no parameter
 }
 
-func (f Flatten) GetCode() (string, error) {
-	return fmt.Sprintf(flatten), nil
+func (f Flatten) GetCode() ([]string, error) {
+	var result []string
+	// TODO: Add comment
+	result = append(result, commentFlatten)
+	result = append(result, fmt.Sprintf(flatten))
+
+	return result, nil
 }
 
 // Rescaling
@@ -281,13 +340,18 @@ type Rescaling struct {
 	Offset *float64 `json:"offset"`
 }
 
-func (r *Rescaling) GetCode() (string, error) {
+func (r *Rescaling) GetCode() ([]string, error) {
 	err := checkNil(r)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	return fmt.Sprintf(rescaling, *r.Scale, *r.Offset), nil
+	var result []string
+	// TODO: Add comment
+	result = append(result, commentRescaling)
+	result = append(result, fmt.Sprintf(rescaling, *r.Scale, *r.Offset))
+
+	return result, nil
 }
 
 // Reshape
@@ -295,10 +359,10 @@ type Reshape struct {
 	TargetShape []int `json:"target_shape"`
 }
 
-func (r *Reshape) GetCode() (string, error) {
+func (r *Reshape) GetCode() ([]string, error) {
 	err := checkNil(r)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	var shape string
@@ -309,7 +373,12 @@ func (r *Reshape) GetCode() (string, error) {
 		}
 	}
 
-	return fmt.Sprintf(reshape, shape), nil
+	var result []string
+	// TODO: Add comment
+	result = append(result, commentReshape)
+	result = append(result, fmt.Sprintf(reshape, shape))
+
+	return result, nil
 }
 
 type Keras struct {
