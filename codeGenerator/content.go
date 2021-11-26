@@ -48,6 +48,8 @@ func (c *Content) BindContent(data map[string]json.RawMessage) error {
 			err = l.Param.Keras.BindKeras(l.Type, layer["param"])
 		case "Math":
 			err = l.Param.Math.BindMath(l.Type, layer["param"])
+		case "Util":
+			continue
 		default:
 			return fmt.Errorf(ErrUnsupportedCategoryType)
 		}
@@ -60,7 +62,7 @@ func (c *Content) BindContent(data map[string]json.RawMessage) error {
 // Generate layer codes from content.json
 func (c *Content) GenLayers() ([]string, error) {
 	var codes []string
-	// TODO: BFS돌리며 레이어 변수 선언 및 연결
+
 	layerIdxMap, inputCntMap := c.GetLayerNameToIdxMapAndInputCountMap()
 
 	// Generate layer variables
