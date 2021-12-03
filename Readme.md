@@ -1,13 +1,14 @@
 # Code converter
 - 그래프 형식으로 그린 신경망을 파이썬 코드로 변환시키는 모듈.
 
-#### v1.1 (2021-08-17)
+## Patch notes
+#### 2021-08-17
 - Optimizer 종류 추가
-#### v1.11 (2021-08-17)
+#### 2021-08-17
 - Rescaling, Reshape 레이어 추가
 - 모델 학습코드 파일 별도 생성하도록 수정
 
-#### v1.20 (2021-08-23)
+#### 2021-08-23
 - Train을 Python 서버에서 실행.
     - CodeConverter으로 학습 요청이 들어오면 파이썬코드로 만들어진 모델을 save
     - save된 모델을 압축한 후 Python 서버로 Model config을 Body에 실어 Post요청
@@ -16,21 +17,25 @@
     - body에 딸려온 Config에서 데이터셋 정보를 갖고 데이터 가공 후 학습.
 - 데이터셋 정보를 Config에 탑재 (임시)
 
-#### v1.21 (2021-08-25)
+#### 2021-08-25
 - Math 모듈 추가
 
-#### v1.30 (2021-09-02)
+#### 2021-09-02
 - Python server 사이에 Message queue 추가
     - 각 Trainer (Worker) 마다 하나의 학습 요청만 처리하도록 설정
     - flask 프레임워크가 필요없어졌기 때문에 삭제
 
-#### v1.31 (2021-08-05)
+#### 2021-08-05
 - 한 노드에 여러 입출력 처리 추가
     - 레이어 변수명 먼저 모두 선언 후 Input 레이어부터 BFS로 순회하며 각 레이어 연걸.
     
-#### v1.311 (2021-10-11)
+#### 2021-10-11
 - Math 모듈 추가
     - add, subtract, log 추가
+
+#### 2021-11-24
+- 생성된 코드에 주석 추가
+    - 추후 레이어에 대한 설명으로 변경 예정
 
 # Supports
 ### [Tensorflow-Keras](https://www.tensorflow.org/?hl=ko)
@@ -270,6 +275,7 @@ Dense_1 = tf.keras.layers.Dense(units=256)
 Activation_1 = tf.keras.layers.Activation(activation="relu")
 Dense_2 = tf.keras.layers.Dense(units=1)
 Activation_2 = tf.keras.layers.Activation(activation="sigmoid")
+
 Dense_1 = Dense_1(Input_1)
 Activation_1 = Activation_1(Dense_1)
 Dense_2 = Dense_2(Activation_1)
